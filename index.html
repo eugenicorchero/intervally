@@ -1,293 +1,484 @@
-
 <!DOCTYPE html>
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intervally - Entrenador Visual d'Intervals Musicals</title>
-    <meta name="description" content="Una aplicació web per a aprendre i practicar intervals musicals de forma visual. Millora les teves habilitats de teoria musical amb exercicis interactius.">
-    <!-- Càrrega de Tailwind CSS -->
+    <meta name="description" content="Aplicació web moderna per a aprendre i practicar intervals musicals de forma visual.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Càrrega de VexFlow (IIFE per exposar global a window) -->
-    <script defer src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/iife/vexflow-min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/iife/vexflow-min.js"></script>
+
     <style>
-        /* Estils Base i Rendiment */
+        :root {
+            --bg-dark: #0b0f19;
+            --stave-bg: #1e293b;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0d1117; /* Fons fosc */
-            color: #e5e7eb; /* Text clar */
+            background-color: var(--bg-dark);
+            color: #f3f4f6;
             min-height: 100vh;
-            overflow-x: hidden;
-        }
-        .interval-button {
-            transition: all 0.1s ease;
-            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.3), 0 1px 3px -1px rgba(0, 0, 0, 0.1);
-        }
-        .interval-button:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 12px -2px rgba(37, 99, 235, 0.3), 0 2px 4px -2px rgba(37, 99, 235, 0.2);
-        }
-        .timer-display {
-            font-size: 1.25rem;
-            font-weight: bold;
-            transition: color 0.5s ease;
-            min-width: 35px; 
-            text-align: right;
-        }
-        .score-display {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .direction-disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        /* Mida del contenidor de VexFlow optimitzada */
-        #stave-container {
-            min-height: 100px;
-            padding: 8px; 
-            background-color: #ffffff; 
-            display: flex; 
-            align-items: center;
-            justify-content: center;
-        }
-        #stave-display {
-            width: 100%;
-            height: auto;
-            overflow: hidden;
-        }
-        
-        /* Layout optimitzat per evitar scroll */
-        .game-layout {
-            height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .game-header-compact {
-            flex-shrink: 0;
-            padding: 0.5rem 0;
-        }
-        
-        .game-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-height: 0;
-        }
-        
-        .game-main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-        }
-        
-        .stave-section {
-            flex-shrink: 0;
-        }
-        
-        .controls-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 0;
-            padding: 0.75rem 0;
         }
 
-        /* Botó compacte per a intervals */
-        .interval-btn-compact {
-            min-height: 2.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .stave-wrapper {
+            background-color: var(--stave-bg);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4), 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            border-radius: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        /* Optimitzacions per a pantalles petites */
-        @media (max-width: 640px) {
-            #stave-container {
-                min-height: 80px;
-                padding: 6px;
-            }
-            .timer-display {
-                font-size: 1rem;
-                min-width: 30px;
-            }
-            .game-header-compact {
-                padding: 0.25rem 0;
-            }
-            .controls-section {
-                padding: 0.5rem 0;
-            }
-            .interval-btn-compact {
-                min-height: 2rem;
-                font-size: 0.75rem;
-            }
+        .stave-success {
+            border-color: #22c55e !important;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3) !important;
         }
-        
-        /* Per a pantalles molt petites en altura */
-        @media (max-height: 600px) {
-            #stave-container {
-                min-height: 70px;
-                padding: 4px;
-            }
-            .game-header-compact {
-                padding: 0.25rem 0;
-            }
-            .controls-section {
-                padding: 0.25rem 0;
-            }
-            .interval-btn-compact {
-                min-height: 1.75rem;
-                font-size: 0.7rem;
-            }
+
+        .stave-error {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3) !important;
         }
-        
-        /* Per a pantalles extremadament petites */
-        @media (max-height: 500px) {
-            #stave-container {
-                min-height: 60px;
-                padding: 2px;
-            }
-            .controls-section {
-                padding: 0.125rem 0;
-            }
-            .interval-btn-compact {
-                min-height: 1.5rem;
-                font-size: 0.65rem;
-            }
+
+        .btn-interval {
+            min-height: 2.8rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            background-color: #1f2937;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e5e7eb;
+            transition: all 0.15s ease;
+            user-select: none;
         }
-        
-        /* Ocultar footer durant el joc */
-        .game-active footer {
-            display: none;
+
+        .btn-interval:hover:not(:disabled) {
+            background-color: #374151;
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .btn-interval.selected {
+            background-color: #2563eb !important;
+            border-color: #60a5fa !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
+        }
+
+        .timer-warning {
+            color: #ef4444 !important;
+            animation: pulse-timer 1s infinite;
+        }
+
+        @keyframes pulse-timer {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
         }
     </style>
 </head>
-<body class="p-2 sm:p-4">
+<body class="p-3 sm:p-6 flex flex-col justify-between">
 
-    <main class="w-full max-w-6xl mx-auto">
+    <div class="w-full max-w-4xl mx-auto flex-1 flex flex-col">
 
-        <header id="main-header" class="text-center mb-4 border-b border-blue-800 pb-2">
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-blue-400 tracking-tight">Intervally</h1>
-            <p class="text-gray-400 text-sm">Entrenador d'Intervals Musicals</p>
+        <!-- Header -->
+        <header id="main-header" class="text-center mb-6">
+            <div class="inline-flex items-center gap-2">
+                <span class="text-3xl">🎼</span>
+                <h1 class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
+                    Intervally
+                </h1>
+            </div>
+            <p class="text-gray-400 text-xs sm:text-sm mt-1">Entrenador Visual d'Intervals Musicals</p>
         </header>
 
-        <section id="start-screen" class="text-center p-4 sm:p-6 bg-gray-800 rounded-xl shadow-2xl transition duration-500">
+        <!-- PANTALLA D'INICI -->
+        <section id="start-screen" class="bg-gray-800/60 backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-gray-700/50 shadow-2xl text-center my-auto">
+            <h2 class="text-2xl font-bold mb-2 text-white">Tria el teu Nivell de Pràctica</h2>
+            <p class="text-gray-400 mb-6 max-w-md mx-auto text-sm">
+                Practica la identificació d'intervals musicals de forma visual. Tens 30 segons per resposta.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                <button onclick="IntervallyApp.startGame('inicial')" 
+                    class="p-5 bg-gradient-to-b from-gray-800 to-gray-900 border border-blue-500/30 hover:border-blue-500 rounded-xl hover:shadow-lg transition text-left">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-lg text-blue-400">Inicial</span>
+                    </div>
+                    <p class="text-xs text-gray-400">(Ascendent: Intervals bàsics sense alteracions)</p>
+                </button>
+
+                <button onclick="IntervallyApp.startGame('intermedio')" 
+                    class="p-5 bg-gradient-to-b from-gray-800 to-gray-900 border border-indigo-500/30 hover:border-indigo-500 rounded-xl hover:shadow-lg transition text-left">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-lg text-indigo-400">Intermedi</span>
+                    </div>
+                    <p class="text-xs text-gray-400">(Ascendent: Tots els intervals amb alteracions)</p>
+                </button>
+
+                <button onclick="IntervallyApp.startGame('dificil')" 
+                    class="p-5 bg-gradient-to-b from-gray-800 to-gray-900 border border-purple-500/30 hover:border-purple-500 rounded-xl hover:shadow-lg transition text-left">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-bold text-lg text-purple-400">Difícil</span>
+                    </div>
+                    <p class="text-xs text-gray-400">(Ascendent/Descendent: Tots els intervals)</p>
+                </button>
+            </div>
+        </section>
+
+        <!-- PANTALLA DE JOC -->
+        <section id="game-screen" class="hidden flex-1 flex flex-col justify-between gap-4">
             
-            <div id="loading-indicator" class="p-6 text-lg font-semibold text-blue-400 hidden">
-                Carregant recursos musicals... 🎶
+            <div class="flex items-center justify-between bg-gray-800/80 border border-gray-700/60 px-4 py-2.5 rounded-xl text-sm">
+                <button onclick="IntervallyApp.returnToMenu()" class="flex items-center gap-1.5 text-gray-400 hover:text-white transition font-medium text-xs sm:text-sm">
+                    ← Menú
+                </button>
+
+                <div class="flex items-center gap-4">
+                    <div class="text-xs sm:text-sm text-gray-400">
+                        Dificultat: <span id="current-difficulty" class="font-semibold text-blue-400 capitalize"></span>
+                    </div>
+                    <div class="text-xs sm:text-sm text-gray-400 bg-gray-900/60 px-3 py-1 rounded-lg border border-gray-700">
+                        Puntuació: <span id="score-correct" class="font-bold text-green-400">0</span>/<span id="score-total" class="font-bold text-gray-200">0</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1.5 font-mono text-base font-bold">
+                    <span class="text-xs text-gray-400 font-sans font-normal">Temps:</span>
+                    <span id="timer-display" class="text-green-400">30</span>
+                </div>
             </div>
 
-            <div id="intro-content">
-                <h2 class="text-xl sm:text-2xl font-bold mb-4 text-white">Tria el teu Nivell de Pràctica</h2>
-                <p class="text-gray-300 mb-6 max-w-2xl mx-auto text-sm sm:text-base">
-                    Practica la identificació d'intervals musicals de forma visual. Tens 30 segons per resposta.
-                </p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    <button id="btn-inicial" onclick="IntervallyApp.startGame('inicial')" aria-controls="game-screen"
-                        class="p-4 bg-blue-700 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-lg transition duration-300 transform hover:scale-[1.02] interval-button">
-                        <span class="text-lg block">Inicial</span>
-                        <span class="text-xs opacity-75 mt-1 block">(Ascendent: Intervals bàsics sense alteracions)</span>
+            <!-- VISUALITZADOR DE PARTITURA -->
+            <div class="stave-wrapper p-4 flex flex-col items-center justify-center min-h-[160px] relative overflow-hidden" id="stave-wrapper">
+                <div id="stave-display" class="w-full flex justify-center items-center"></div>
+            </div>
+
+            <!-- PANELS DE CONTROL -->
+            <div class="space-y-4">
+                
+                <!-- Direcció -->
+                <div id="direction-container" class="grid grid-cols-2 gap-2 p-1 bg-gray-900/80 rounded-xl border border-gray-800">
+                    <button id="btn-ascendente" onclick="IntervallyApp.selectDirection('ascendente')"
+                        class="py-2 text-xs font-semibold rounded-lg text-white bg-blue-600 transition">
+                        Ascendent
                     </button>
-                    <button id="btn-intermedio" onclick="IntervallyApp.startGame('intermedio')" aria-controls="game-screen"
-                        class="p-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg shadow-lg transition duration-300 transform hover:scale-[1.02] interval-button">
-                        <span class="text-lg block">Intermedi</span>
-                        <span class="text-xs opacity-75 mt-1 block">(Ascendent: Tots els intervals amb alteracions)</span>
+                    <button id="btn-descendente" onclick="IntervallyApp.selectDirection('descendente')"
+                        class="py-2 text-xs font-semibold rounded-lg text-gray-400 bg-transparent transition">
+                        Descendent
                     </button>
-                    <button id="btn-dificil" onclick="IntervallyApp.startGame('dificil')" aria-controls="game-screen"
-                        class="p-4 bg-blue-500 hover:bg-blue-400 text-white font-semibold rounded-lg shadow-lg transition duration-300 transform hover:scale-[1.02] interval-button">
-                        <span class="text-lg block">Difícil</span>
-                        <span class="text-xs opacity-75 mt-1 block">(Ascendent/Descendent: Tots els intervals)</span>
+                </div>
+
+                <!-- Botons d'Intervals -->
+                <div>
+                    <h3 class="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider text-center">
+                        Selecciona la Resposta
+                    </h3>
+                    <div id="interval-buttons-container" class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+                        <!-- Generats des de JS -->
+                    </div>
+                </div>
+
+                <!-- Feedback Visual -->
+                <div id="feedback-message" class="text-center min-h-[24px] font-semibold text-sm transition-all duration-200"></div>
+
+                <!-- Botons d'Acció -->
+                <div class="flex gap-3">
+                    <button id="btn-check" onclick="IntervallyApp.checkAnswer()" disabled
+                        class="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-600 border border-blue-400/30 text-white shadow-lg transition duration-150">
+                        Comprova
+                    </button>
+                    <button id="btn-next" onclick="IntervallyApp.nextInterval()" disabled
+                        class="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white transition duration-150">
+                        Següent
                     </button>
                 </div>
             </div>
+
         </section>
 
-        <section id="game-screen" aria-labelledby="game-heading" class="hidden game-layout">
-            <!-- Compact header for game -->
-            <div class="game-header-compact">
-                <div class="flex flex-col sm:flex-row justify-between items-center px-3 py-2 bg-gray-900 rounded-lg shadow-inner gap-2 border border-gray-700">
-                    <div class="text-sm text-gray-400">
-                        <span class="hidden sm:inline">Dificultat: </span><span id="current-difficulty" class="font-semibold text-blue-300"></span>
-                    </div>
-                    
-                    <div class="score-display text-sm text-gray-400" aria-live="polite">
-                        <span class="hidden sm:inline">Puntuació: </span>
-                        <span id="score-correct" class="font-semibold text-green-400">0</span>/<span id="score-total" class="font-semibold text-white">0</span>
-                    </div>
-                    
-                    <div class="flex items-center space-x-2">
-                        <button onclick="IntervallyApp.returnToMenu()" class="text-xs text-gray-400 hover:text-white transition-colors">
-                            ← Menú
-                        </button>
-                        <span class="text-gray-400 text-sm">Temps:</span>
-                        <div class="timer-display text-green-500" id="timer-display" aria-live="off">30</div>
-                    </div>
-                </div>
-            </div>
+    </div>
 
-            <!-- Game content container -->
-            <div class="game-content bg-gray-800 rounded-xl shadow-2xl p-3 sm:p-4">
-                <!-- Musical staff section -->
-                <div class="stave-section mb-3">
-                    <div id="stave-container" class="rounded-lg shadow-xl border border-gray-700">
-                        <div id="stave-display" role="img" aria-label="Pentagrama amb un interval musical"></div> 
-                    </div>
-                </div>
-
-                <!-- Controls section -->
-                <div class="controls-section">
-                    <div class="space-y-3">
-                        <!-- Interval buttons -->
-                        <div>
-                            <h3 id="game-heading" class="text-sm font-semibold text-white mb-2">Selecciona la Resposta</h3>
-                            <div id="interval-buttons-container" class="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-7 gap-2">
-                                <!-- Buttons generated dynamically -->
-                            </div>
-                        </div>
-
-                        <!-- Direction buttons -->
-                        <div class="flex justify-center space-x-3 p-2 bg-gray-900 rounded-lg border border-gray-700">
-                            <button id="btn-ascendente" onclick="IntervallyApp.selectDirection('ascendente')"
-                                class="interval-button p-2 w-1/2 rounded-lg font-semibold text-sm bg-gray-600 hover:bg-gray-500 text-white border-2 border-transparent focus:border-blue-400 transition duration-150" aria-pressed="false">
-                                Ascendent
-                            </button>
-                            <button id="btn-descendente" onclick="IntervallyApp.selectDirection('descendente')"
-                                class="interval-button p-2 w-1/2 rounded-lg font-semibold text-sm bg-gray-600 hover:bg-gray-500 text-white border-2 border-transparent focus:border-blue-400 transition duration-150" aria-pressed="false">
-                                Descendent
-                            </button>
-                        </div>
-
-                        <!-- Feedback message -->
-                        <div id="feedback-message" class="text-center h-6 font-bold text-sm" aria-live="off"></div>
-
-                        <!-- Action buttons -->
-                        <div class="flex justify-center space-x-3">
-                            <button id="btn-check" onclick="IntervallyApp.checkAnswer()" disabled
-                                class="p-3 rounded-lg font-bold w-1/2 text-sm bg-blue-700 hover:bg-blue-600 text-white disabled:bg-gray-500 disabled:cursor-not-allowed transition duration-150 transform hover:scale-[1.01] interval-button">
-                                Comprova
-                            </button>
-                            <button id="btn-next" onclick="IntervallyApp.nextInterval()" disabled
-                                class="p-3 rounded-lg font-bold w-1/2 text-sm bg-gray-600 hover:bg-gray-500 text-white disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 transform hover:scale-[1.01] interval-button">
-                                Següent
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-    </main>
-
-    <footer id="main-footer" class="w-full max-w-6xl mx-auto mt-4 text-center text-gray-500 border-t border-gray-700 pt-2 text-xs">
+    <footer class="text-center text-gray-500 text-xs py-4 mt-auto">
         &copy; Eugeni Corchero 2025
     </footer>
 
-    <script defer src="app.js"></script>
+    <!-- LÒGICA JS COMPLETA I CORREGIDA -->
+    <script>
+        const IntervallyApp = (function() {
+            let score = { correct: 0, total: 0 };
+            let timer = null;
+            let timeLeft = 30;
+            let currentDifficulty = 'inicial';
+            let selectedInterval = null;
+            let selectedDirection = 'ascendente';
+            
+            let currentExercise = {
+                note1: { key: "c/4", accidental: null },
+                note2: { key: "g/4", accidental: null },
+                type: '5P',
+                direction: 'ascendente'
+            };
+
+            const allIntervals = [
+                { id: '2m', name: '2ª menor' },
+                { id: '2M', name: '2ª Major' },
+                { id: '3m', name: '3ª menor' },
+                { id: '3M', name: '3ª Major' },
+                { id: '4P', name: '4ª Justa' },
+                { id: '4A', name: '4ª Aug.' },
+                { id: '5P', name: '5ª Justa' },
+                { id: '6m', name: '6ª menor' },
+                { id: '6M', name: '6ª Major' },
+                { id: '7m', name: '7ª menor' },
+                { id: '7M', name: '7ª Major' },
+                { id: '8P', name: '8ª Justa' }
+            ];
+
+            function init() {
+                renderIntervalButtons();
+            }
+
+            function renderIntervalButtons() {
+                const container = document.getElementById('interval-buttons-container');
+                container.innerHTML = '';
+                
+                allIntervals.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-interval text-xs sm:text-sm';
+                    btn.innerText = item.name;
+                    btn.onclick = () => selectInterval(item.id, btn);
+                    container.appendChild(btn);
+                });
+            }
+
+            function startGame(difficulty) {
+                currentDifficulty = difficulty;
+                score = { correct: 0, total: 0 };
+                updateScoreUI();
+
+                const dirContainer = document.getElementById('direction-container');
+                if (difficulty === 'dificil') {
+                    dirContainer.classList.remove('opacity-50', 'pointer-events-none');
+                } else {
+                    dirContainer.classList.add('opacity-50', 'pointer-events-none');
+                    selectDirection('ascendente');
+                }
+
+                document.getElementById('start-screen').classList.add('hidden');
+                document.getElementById('game-screen').classList.remove('hidden');
+                document.getElementById('current-difficulty').innerText = difficulty;
+
+                nextInterval();
+            }
+
+            function selectInterval(id, element) {
+                selectedInterval = id;
+                document.querySelectorAll('.btn-interval').forEach(b => b.classList.remove('selected'));
+                element.classList.add('selected');
+                document.getElementById('btn-check').disabled = false;
+            }
+
+            function selectDirection(dir) {
+                selectedDirection = dir;
+                const btnAsc = document.getElementById('btn-ascendente');
+                const btnDesc = document.getElementById('btn-descendente');
+
+                if (dir === 'ascendente') {
+                    btnAsc.className = "py-2 text-xs font-semibold rounded-lg text-white bg-blue-600 transition";
+                    btnDesc.className = "py-2 text-xs font-semibold rounded-lg text-gray-400 bg-transparent transition";
+                } else {
+                    btnDesc.className = "py-2 text-xs font-semibold rounded-lg text-white bg-blue-600 transition";
+                    btnAsc.className = "py-2 text-xs font-semibold rounded-lg text-gray-400 bg-transparent transition";
+                }
+            }
+
+            function nextInterval() {
+                resetState();
+                generateExercise();
+                renderStave();
+                startTimer();
+            }
+
+            function resetState() {
+                clearInterval(timer);
+                timeLeft = 30;
+                selectedInterval = null;
+                
+                const timerDisplay = document.getElementById('timer-display');
+                timerDisplay.innerText = '30';
+                timerDisplay.className = 'text-green-500 font-bold';
+
+                document.getElementById('feedback-message').innerText = '';
+                document.getElementById('stave-wrapper').className = 'stave-wrapper p-4 flex flex-col items-center justify-center min-h-[160px] relative overflow-hidden';
+                
+                document.querySelectorAll('.btn-interval').forEach(b => {
+                    b.classList.remove('selected');
+                    b.disabled = false;
+                });
+
+                document.getElementById('btn-check').disabled = true;
+                document.getElementById('btn-next').disabled = true;
+            }
+
+            function startTimer() {
+                const display = document.getElementById('timer-display');
+                timer = setInterval(() => {
+                    timeLeft--;
+                    display.innerText = timeLeft;
+                    
+                    if (timeLeft <= 10) {
+                        display.className = 'timer-warning font-bold';
+                    }
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        checkAnswer(true);
+                    }
+                }, 1000);
+            }
+
+            function generateExercise() {
+                const pool = currentDifficulty === 'inicial' 
+                    ? ['2M', '3M', '4P', '5P', '6M', '7M', '8P']
+                    : allIntervals.map(i => i.id);
+
+                const chosenInterval = pool[Math.floor(Math.random() * pool.length)];
+                
+                let dir = 'ascendente';
+                if (currentDifficulty === 'dificil') {
+                    dir = Math.random() > 0.5 ? 'ascendente' : 'descendente';
+                }
+
+                // Generació d'exercici
+                if (chosenInterval === '3M') {
+                    currentExercise = {
+                        note1: { key: "c/4", accidental: null },
+                        note2: { key: "e/4", accidental: null },
+                        type: '3M',
+                        direction: dir
+                    };
+                } else if (chosenInterval === '2m') {
+                    currentExercise = {
+                        note1: { key: "c/4", accidental: null },
+                        note2: { key: "d/4", accidental: "b" },
+                        type: '2m',
+                        direction: dir
+                    };
+                } else {
+                    currentExercise = {
+                        note1: { key: "c/4", accidental: null },
+                        note2: { key: "g/4", accidental: null },
+                        type: '5P',
+                        direction: dir
+                    };
+                }
+
+                if (dir === 'descendente') {
+                    const temp = currentExercise.note1;
+                    currentExercise.note1 = currentExercise.note2;
+                    currentExercise.note2 = temp;
+                }
+            }
+
+            function renderStave() {
+                const container = document.getElementById('stave-display');
+                container.innerHTML = '';
+
+                if (typeof Vex !== 'undefined') {
+                    const VF = Vex.Flow;
+                    const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
+                    renderer.resize(280, 140);
+                    
+                    const context = renderer.getContext();
+                    context.setFillStyle("#f3f4f6");
+                    context.setStrokeStyle("#f3f4f6");
+
+                    const stave = new VF.Stave(10, 10, 250);
+                    stave.setContext(context);
+                    stave.addClef("treble");
+                    stave.draw();
+
+                    // Creació de la 1a nota
+                    const note1 = new VF.StaveNote({ keys: [currentExercise.note1.key], duration: "h" });
+                    if (currentExercise.note1.accidental) {
+                        note1.addModifier(new VF.Accidental(currentExercise.note1.accidental));
+                    }
+
+                    // Creació de la 2a nota
+                    const note2 = new VF.StaveNote({ keys: [currentExercise.note2.key], duration: "h" });
+                    if (currentExercise.note2.accidental) {
+                        note2.addModifier(new VF.Accidental(currentExercise.note2.accidental));
+                    }
+
+                    note1.setStyle({ fillStyle: "#f3f4f6", strokeStyle: "#f3f4f6" });
+                    note2.setStyle({ fillStyle: "#f3f4f6", strokeStyle: "#f3f4f6" });
+
+                    const voice = new VF.Voice({ num_beats: 4, beat_value: 4 });
+                    voice.addTickables([note1, note2]);
+
+                    const formatter = new VF.Formatter();
+                    formatter.joinVoices([voice]);
+                    formatter.format([voice], 160);
+                    
+                    voice.draw(context, stave);
+                }
+            }
+
+            function checkAnswer(isTimeout = false) {
+                clearInterval(timer);
+                score.total++;
+
+                const feedback = document.getElementById('feedback-message');
+                const staveWrapper = document.getElementById('stave-wrapper');
+
+                const isCorrectInterval = selectedInterval === currentExercise.type;
+                const isCorrectDirection = (currentDifficulty !== 'dificil') || (selectedDirection === currentExercise.direction);
+
+                if (!isTimeout && isCorrectInterval && isCorrectDirection) {
+                    score.correct++;
+                    feedback.innerText = "✨ Correcte!";
+                    feedback.className = "text-center min-h-[24px] font-bold text-sm text-green-400";
+                    staveWrapper.classList.add('stave-success');
+                } else {
+                    const correctObj = allIntervals.find(i => i.id === currentExercise.type);
+                    feedback.innerText = isTimeout 
+                        ? `⏰ Temps esgotat! Era ${correctObj.name} (${currentExercise.direction})` 
+                        : `❌ Incorrecte. Era ${correctObj.name} (${currentExercise.direction})`;
+                    feedback.className = "text-center min-h-[24px] font-bold text-sm text-red-400";
+                    staveWrapper.classList.add('stave-error');
+                }
+
+                updateScoreUI();
+                document.getElementById('btn-check').disabled = true;
+                document.getElementById('btn-next').disabled = false;
+            }
+
+            function updateScoreUI() {
+                document.getElementById('score-correct').innerText = score.correct;
+                document.getElementById('score-total').innerText = score.total;
+            }
+
+            function returnToMenu() {
+                clearInterval(timer);
+                document.getElementById('game-screen').classList.add('hidden');
+                document.getElementById('start-screen').classList.remove('hidden');
+            }
+
+            window.addEventListener('DOMContentLoaded', init);
+
+            return {
+                startGame,
+                selectDirection,
+                checkAnswer,
+                nextInterval,
+                returnToMenu
+            };
+        })();
+    </script>
 </body>
 </html>
