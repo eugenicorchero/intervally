@@ -1,256 +1,517 @@
 <!DOCTYPE html>
-<html lang="ca">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intervally - Entrenador Visual d'Intervals Musicals</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- VexFlow CDN (Versió Estable 3.0.9) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/3.0.9/vexflow-min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Diseño y desarrollo web profesional, moderno y de alto rendimiento.">
+  <title>Mi Web Profesional | Desarrollo & Diseño Web</title>
+  
+  <!-- Tipografía Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --bg-dark: #0b0f19;
-            --stave-bg: #1e293b;
-        }
+  <style>
+    /* ==========================================
+       VARIABLES Y RESET (Performant & Clean)
+       ========================================== */
+    :root {
+      --bg-color: #0b0f19;
+      --surface-color: rgba(22, 31, 48, 0.7);
+      --surface-border: rgba(255, 255, 255, 0.08);
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --accent: #06b6d4;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --radius: 16px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: #f3f4f6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
 
-        .stave-wrapper {
-            background-color: var(--stave-bg);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4), 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            border-radius: 1rem;
-        }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
 
-        .btn-interval {
-            min-height: 2.8rem;
-            font-weight: 600;
-            border-radius: 0.75rem;
-            background-color: #1f2937;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #e5e7eb;
-            transition: all 0.15s ease;
-        }
+    /* Background Glow Accent */
+    .bg-glow {
+      position: fixed;
+      top: -10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(6, 182, 212, 0.05) 50%, transparent 70%);
+      z-index: -1;
+      pointer-events: none;
+    }
 
-        .btn-interval:hover:not(:disabled) {
-            background-color: #374151;
-            border-color: #3b82f6;
-        }
+    /* ==========================================
+       HEADER Y NAVEGACIÓN (Responsive & Glass)
+       ========================================== */
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      background: rgba(11, 15, 25, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--surface-border);
+    }
 
-        .btn-interval.selected {
-            background-color: #2563eb !important;
-            border-color: #60a5fa !important;
-            color: #ffffff !important;
-        }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 2rem;
+    }
 
-        #stave-display svg {
-            margin: 0 auto;
-        }
-    </style>
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .nav-links a:hover {
+      color: var(--text-main);
+    }
+
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+    }
+
+    .menu-toggle span {
+      width: 25px;
+      height: 3px;
+      background-color: var(--text-main);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    /* ==========================================
+       HERO SECTION
+       ========================================== */
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10rem 2rem 5rem 2rem;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, #ffffff 30%, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      max-width: 650px;
+      margin: 0 auto 2.5rem auto;
+      color: var(--text-muted);
+      font-size: 1.15rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 0.8rem 1.8rem;
+      border-radius: 10px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      border: 1px solid var(--surface-border);
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    /* ==========================================
+       SECCIONES Y TARJETAS (Glassmorphism & Grid)
+       ========================================== */
+    .section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .section-title h2 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title p {
+      color: var(--text-muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .card {
+      background: var(--surface-color);
+      border: 1px solid var(--surface-border);
+      padding: 2rem;
+      border-radius: var(--radius);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(99, 102, 241, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+    }
+
+    .card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* ==========================================
+       SECCIÓN DE ENLACES EXTERNOS / RECURSOS
+       ========================================== */
+    .links-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .link-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 1.5rem;
+      background: var(--surface-color);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: var(--transition);
+    }
+
+    .link-item:hover {
+      border-color: var(--accent);
+      transform: translateX(5px);
+      background: rgba(22, 31, 48, 0.9);
+    }
+
+    .link-item span {
+      font-weight: 600;
+    }
+
+    .link-arrow {
+      color: var(--accent);
+    }
+
+    /* ==========================================
+       FOOTER
+       ========================================== */
+    footer {
+      border-top: 1px solid var(--surface-border);
+      padding: 3rem 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 4rem;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      list-style: none;
+    }
+
+    .social-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .social-links a:hover {
+      color: var(--primary);
+    }
+
+    /* ==========================================
+       MEDIA QUERIES (Responsivo Móvil y Tablet)
+       ========================================== */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.3rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+
+      .menu-toggle {
+        display: flex;
+      }
+
+      .nav-links {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: rgba(11, 15, 25, 0.95);
+        backdrop-filter: blur(15px);
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 0;
+        gap: 1.5rem;
+        border-bottom: 1px solid var(--surface-border);
+        clip-path: circle(0% at 100% 0);
+        transition: clip-path 0.4s ease-in-out;
+      }
+
+      .nav-links.active {
+        clip-path: circle(140% at 100% 0);
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
 </head>
-<body class="p-3 sm:p-6 flex flex-col justify-between">
+<body>
 
-    <div class="w-full max-w-4xl mx-auto flex-1 flex flex-col">
+  <div class="bg-glow"></div>
 
-        <!-- Header -->
-        <header id="main-header" class="text-center mb-6">
-            <div class="inline-flex items-center gap-2">
-                <span class="text-3xl">🎼</span>
-                <h1 class="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
-                    Intervally
-                </h1>
-            </div>
-            <p class="text-gray-400 text-xs sm:text-sm mt-1">Entrenador Visual d'Intervals Musicals</p>
-        </header>
+  <!-- NAVEGACIÓN -->
+  <header>
+    <nav class="nav-container">
+      <a href="#" class="logo">TuMarca.</a>
+      <div class="menu-toggle" id="mobile-menu" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#proyectos">Proyectos</a></li>
+        <li><a href="#recursos">Recursos</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+  </header>
 
-        <!-- PANTALLA D'INICI -->
-        <section id="start-screen" class="bg-gray-800/60 backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-gray-700/50 shadow-2xl text-center my-auto">
-            <h2 class="text-2xl font-bold mb-2 text-white">Tria el teu Nivell de Pràctica</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto mt-6">
-                <button onclick="IntervallyApp.startGame('inicial')" class="p-5 bg-gray-900 border border-blue-500/30 hover:border-blue-500 rounded-xl text-left">
-                    <span class="font-bold text-lg text-blue-400">Inicial</span>
-                    <p class="text-xs text-gray-400 mt-1">(Intervals bàsics)</p>
-                </button>
-                <button onclick="IntervallyApp.startGame('intermedio')" class="p-5 bg-gray-900 border border-indigo-500/30 hover:border-indigo-500 rounded-xl text-left">
-                    <span class="font-bold text-lg text-indigo-400">Intermedi</span>
-                    <p class="text-xs text-gray-400 mt-1">(Tots els intervals)</p>
-                </button>
-                <button onclick="IntervallyApp.startGame('dificil')" class="p-5 bg-gray-900 border border-purple-500/30 hover:border-purple-500 rounded-xl text-left">
-                    <span class="font-bold text-lg text-purple-400">Difícil</span>
-                    <p class="text-xs text-gray-400 mt-1">(Ascendent / Descendent)</p>
-                </button>
-            </div>
-        </section>
+  <!-- HERO SECTION -->
+  <main id="inicio">
+    <section class="hero">
+      <span class="badge">🚀 Nueva Web 2.0</span>
+      <h1>Diseño Digital que <span>Impulsa Tu Negocio</span></h1>
+      <p>Creamos experiencias digitales de alto impacto, ultra rápidas y optimizadas para todos los dispositivos.</p>
+      <div class="btn-group">
+        <a href="#contacto" class="btn btn-primary">Iniciar Proyecto &rarr;</a>
+        <a href="#proyectos" class="btn btn-secondary">Ver Trabajos</a>
+      </div>
+    </section>
 
-        <!-- PANTALLA DE JOC -->
-        <section id="game-screen" class="hidden flex-1 flex flex-col justify-between gap-4">
-            
-            <div class="flex items-center justify-between bg-gray-800/80 px-4 py-2.5 rounded-xl text-sm">
-                <button onclick="IntervallyApp.returnToMenu()" class="text-gray-400 hover:text-white text-xs sm:text-sm">← Menú</button>
-                <div class="text-xs sm:text-sm text-gray-400">
-                    Dificultat: <span id="current-difficulty" class="font-semibold text-blue-400 capitalize"></span>
-                </div>
-                <div class="text-xs sm:text-sm text-gray-400">
-                    Puntuació: <span id="score-correct" class="font-bold text-green-400">0</span>/<span id="score-total" class="font-bold text-gray-200">0</span>
-                </div>
-            </div>
+    <!-- SERVICIOS -->
+    <section id="servicios" class="section">
+      <div class="section-title">
+        <h2>Servicios Profesionales</h2>
+        <p>Soluciones hechas a medida para hacer crecer tu marca online</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <h3>Alto Rendimiento</h3>
+          <p>Sitios web ultra rápidos optimizados para Google (Core Web Vitals), mejorando la conversión y experiencia del usuario.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📱</div>
+          <h3>Diseño Responsive</h3>
+          <p>Adaptación perfecta e intuitiva para móviles, tablets y pantallas de escritorio de cualquier resolución.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🎨</div>
+          <h3>UI/UX Moderno</h3>
+          <p>Interfaces atractivas basadas en las últimas tendencias de diseño para captar la atención de tus clientes.</p>
+        </div>
+      </div>
+    </section>
 
-            <!-- VISUALITZADOR DE PARTITURA -->
-            <div class="stave-wrapper p-4 flex flex-col items-center justify-center min-h-[180px] relative" id="stave-wrapper">
-                <div id="stave-display" class="w-full flex justify-center items-center"></div>
-            </div>
+    <!-- PROYECTOS / PORTAFOLIO -->
+    <section id="proyectos" class="section">
+      <div class="section-title">
+        <h2>Proyectos Destacados</h2>
+        <p>Algunos de nuestros últimos trabajos</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3>E-Commerce de Moda</h3>
+          <p>Plataforma de ventas con tasa de conversión optimizada y pasarela de pago integrada.</p>
+        </div>
+        <div class="card">
+          <h3>SaaS Dashboard</h3>
+          <p>Interfaz de analítica de datos en tiempo real diseñada para ofrecer simplicidad y eficiencia.</p>
+        </div>
+      </div>
+    </section>
 
-            <!-- BOTONS -->
-            <div class="space-y-4">
-                <div id="interval-buttons-container" class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2"></div>
-                <div id="feedback-message" class="text-center min-h-[24px] font-semibold text-sm"></div>
-                <div class="flex gap-3">
-                    <button id="btn-check" onclick="IntervallyApp.checkAnswer()" disabled class="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-blue-600 disabled:bg-gray-800 text-white">Comprova</button>
-                    <button id="btn-next" onclick="IntervallyApp.nextInterval()" disabled class="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-gray-700 disabled:opacity-40 text-white">Següent</button>
-                </div>
-            </div>
+    <!-- ENLACES DE INTERÉS / RECURSOS -->
+    <section id="recursos" class="section">
+      <div class="section-title">
+        <h2>Enlaces de Interés</h2>
+        <p>Recursos adicionales y accesos directos</p>
+      </div>
+      <div class="links-list" style="max-width: 700px; margin: 0 auto;">
+        <a href="https://github.com" target="_blank" rel="noopener" class="link-item">
+          <span>Ver código en GitHub</span>
+          <span class="link-arrow">&nearr;</span>
+        </a>
+        <a href="https://linkedin.com" target="_blank" rel="noopener" class="link-item">
+          <span>Perfil de LinkedIn</span>
+          <span class="link-arrow">&nearr;</span>
+        </a>
+        <a href="#" class="link-item">
+          <span>Descargar Currículum / Dossier (PDF)</span>
+          <span class="link-arrow">&darr;</span>
+        </a>
+      </div>
+    </section>
+  </main>
 
-        </section>
+  <!-- FOOTER -->
+  <footer id="contacto">
+    <ul class="social-links">
+      <li><a href="#">Twitter/X</a></li>
+      <li><a href="#">LinkedIn</a></li>
+      <li><a href="#">GitHub</a></li>
+      <li><a href="#">Instagram</a></li>
+    </ul>
+    <p>&copy; 2026 TuMarca. Todos los derechos reservados. Creado con rendimiento en mente.</p>
+  </footer>
 
-    </div>
+  <!-- JAVASCRIPT (Performance Optimizado) -->
+  <script>
+    // Menú Hamburguesa para Móviles
+    const menuToggle = document.getElementById('mobile-menu');
+    const navLinks = document.getElementById('nav-links');
 
-    <script>
-        const IntervallyApp = (function() {
-            let score = { correct: 0, total: 0 };
-            let selectedInterval = null;
-            let currentExercise = { note1: "c/4", note2: "g/4", type: '5P' };
+    menuToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+    });
 
-            const allIntervals = [
-                { id: '1P', name: 'Uníson' },
-                { id: '2m', name: '2ª menor' },
-                { id: '2M', name: '2ª Major' },
-                { id: '3m', name: '3ª menor' },
-                { id: '3M', name: '3ª Major' },
-                { id: '4P', name: '4ª Justa' },
-                { id: '5P', name: '5ª Justa' },
-                { id: '8P', name: '8ª Justa' }
-            ];
-
-            function init() {
-                renderButtons();
-            }
-
-            function renderButtons() {
-                const container = document.getElementById('interval-buttons-container');
-                container.innerHTML = '';
-                allIntervals.forEach(item => {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-interval text-xs sm:text-sm';
-                    btn.innerText = item.name;
-                    btn.onclick = () => {
-                        selectedInterval = item.id;
-                        document.querySelectorAll('.btn-interval').forEach(b => b.classList.remove('selected'));
-                        btn.classList.add('selected');
-                        document.getElementById('btn-check').disabled = false;
-                    };
-                    container.appendChild(btn);
-                });
-            }
-
-            function startGame(difficulty) {
-                document.getElementById('start-screen').classList.add('hidden');
-                document.getElementById('game-screen').classList.remove('hidden');
-                document.getElementById('current-difficulty').innerText = difficulty;
-                nextInterval();
-            }
-
-            function nextInterval() {
-                document.getElementById('feedback-message').innerText = '';
-                document.getElementById('btn-check').disabled = true;
-                document.getElementById('btn-next').disabled = true;
-                document.querySelectorAll('.btn-interval').forEach(b => b.classList.remove('selected'));
-                
-                // Renderitzar la partitura directament
-                renderStaveOriginal();
-            }
-
-            // MÈTODE ORIGINAL RESTRUCTURAT I SENSE ERRORS
-            function renderStaveOriginal() {
-                const container = document.getElementById('stave-display');
-                container.innerHTML = '';
-
-                if (typeof Vex === 'undefined') {
-                    console.error("VexFlow no carregat");
-                    return;
-                }
-
-                const VF = Vex.Flow;
-                const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
-                renderer.resize(250, 130);
-                const context = renderer.getContext();
-
-                // Estil clar per al fons fosc
-                context.setFillStyle("#f3f4f6");
-                context.setStrokeStyle("#f3f4f6");
-
-                const stave = new VF.Stave(10, 10, 230);
-                stave.addClef("treble");
-                stave.setContext(context).draw();
-
-                // Dibuix directe de les dues notes del pentagrama
-                const notes = [
-                    new VF.StaveNote({ keys: [currentExercise.note1], duration: "h" }),
-                    new VF.StaveNote({ keys: [currentExercise.note2], duration: "h" })
-                ];
-
-                // Aplicar estil blanc a les notes
-                notes.forEach(note => {
-                    note.setStyle({ fillStyle: "#f3f4f6", strokeStyle: "#f3f4f6" });
-                });
-
-                const voice = new VF.Voice({ num_beats: 4, beat_value: 4 });
-                voice.addTickables(notes);
-
-                const formatter = new VF.Formatter().joinVoices([voice]);
-                formatter.format([voice], 130);
-
-                voice.draw(context, stave);
-            }
-
-            function checkAnswer() {
-                score.total++;
-                const feedback = document.getElementById('feedback-message');
-                if (selectedInterval === currentExercise.type) {
-                    score.correct++;
-                    feedback.innerText = "✨ Correcte!";
-                    feedback.className = "text-center min-h-[24px] font-bold text-sm text-green-400";
-                } else {
-                    feedback.innerText = "❌ Incorrecte!";
-                    feedback.className = "text-center min-h-[24px] font-bold text-sm text-red-400";
-                }
-                document.getElementById('score-correct').innerText = score.correct;
-                document.getElementById('score-total').innerText = score.total;
-                document.getElementById('btn-check').disabled = true;
-                document.getElementById('btn-next').disabled = false;
-            }
-
-            function returnToMenu() {
-                document.getElementById('game-screen').classList.add('hidden');
-                document.getElementById('start-screen').classList.remove('hidden');
-            }
-
-            window.addEventListener('DOMContentLoaded', init);
-
-            return { startGame, checkAnswer, nextInterval, returnToMenu };
-        })();
-    </script>
+    // Cierra el menú al hacer clic en cualquier enlace
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+      });
+    });
+  </script>
 </body>
 </html>
