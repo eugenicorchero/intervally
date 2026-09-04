@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intervally - Entrenador Visual d'Intervals Musicals</title>
-    <meta name="description" content="Aplicació web moderna per a aprendre i practicar intervals musicals de forma visual.">
+    <meta name="description" content="Aplicació web moderna per a aprendre i practicar intervals musicals de forma visual i auditiva.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inclusió oficial de VexFlow v4.2.3 -->
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/iife/vexflow-min.js"></script>
 
     <style>
@@ -79,6 +80,11 @@
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.6; transform: scale(1.1); }
         }
+
+        /* Assegura que les línies del SVG de VexFlow siguin visibles */
+        #stave-display svg {
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body class="p-3 sm:p-6 flex flex-col justify-between">
@@ -100,7 +106,7 @@
         <section id="start-screen" class="bg-gray-800/60 backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-gray-700/50 shadow-2xl text-center my-auto">
             <h2 class="text-2xl font-bold mb-2 text-white">Tria el teu Nivell de Pràctica</h2>
             <p class="text-gray-400 mb-6 max-w-md mx-auto text-sm">
-                Practica la identificació d'intervals musicals de forma visual. Tens 30 segons per resposta.
+                Practica la identificació d'intervals musicals de forma visual i auditiva. Tens 30 segons per resposta.
             </p>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
@@ -154,8 +160,14 @@
             </div>
 
             <!-- VISUALITZADOR DE PARTITURA -->
-            <div class="stave-wrapper p-4 flex flex-col items-center justify-center min-h-[160px] relative overflow-hidden" id="stave-wrapper">
+            <div class="stave-wrapper p-4 flex flex-col items-center justify-center min-h-[180px] relative overflow-hidden" id="stave-wrapper">
                 <div id="stave-display" class="w-full flex justify-center items-center"></div>
+                
+                <button onclick="IntervallyApp.playAudio()" title="Escolta l'interval"
+                    class="absolute top-3 right-3 bg-gray-900/80 hover:bg-blue-600 text-gray-300 hover:text-white border border-gray-700 hover:border-blue-400 p-2 rounded-xl transition duration-200 flex items-center gap-1.5 text-xs font-semibold shadow-lg">
+                    <span>🔊</span>
+                    <span class="hidden sm:inline">Escolta</span>
+                </button>
             </div>
 
             <!-- PANELS DE CONTROL -->
@@ -179,7 +191,6 @@
                         Selecciona la Resposta
                     </h3>
                     <div id="interval-buttons-container" class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-                        <!-- Generats des de JS -->
                     </div>
                 </div>
 
@@ -207,7 +218,6 @@
         &copy; Eugeni Corchero 2025
     </footer>
 
-    <!-- LÒGICA JS COMPLETA I CORREGIDA -->
     <script>
         const IntervallyApp = (function() {
             let score = { correct: 0, total: 0 };
@@ -216,6 +226,7 @@
             let currentDifficulty = 'inicial';
             let selectedInterval = null;
             let selectedDirection = 'ascendente';
+            let audioCtx = null;
             
             let currentExercise = {
                 note1: { key: "c/4", accidental: null },
@@ -225,6 +236,7 @@
             };
 
             const allIntervals = [
+                { id: '1P', name: 'Uníson' },
                 { id: '2m', name: '2ª menor' },
                 { id: '2M', name: '2ª Major' },
                 { id: '3m', name: '3ª menor' },
@@ -241,6 +253,65 @@
 
             function init() {
                 renderIntervalButtons();
+            }
+
+            function getAudioContext() {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                return audioCtx;
+            }
+
+            function keyToFrequency(vexKey, accidental) {
+                const parts = vexKey.split('/');
+                const noteName = parts[0].toLowerCase();
+                const octave = parseInt(parts[1], 10);
+
+                const baseNotes = { 'c': 0, 'd': 2, 'e': 4, 'f': 5, 'g': 7, 'a': 9, 'b': 11 };
+                let semitones = baseNotes[noteName] || 0;
+
+                if (accidental === '#') semitones += 1;
+                if (accidental === 'b') semitones -= 1;
+
+                const midiNum = (octave + 1) * 12 + semitones;
+                return 440 * Math.pow(2, (midiNum - 69) / 12);
+            }
+
+            function playTone(freq, startTime, duration = 0.8) {
+                try {
+                    const ctx = getAudioContext();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, startTime);
+
+                    gain.gain.setValueAtTime(0, startTime);
+                    gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                } catch (e) {
+                    console.log("Audio Error:", e);
+                }
+            }
+
+            function playAudio() {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+
+                const freq1 = keyToFrequency(currentExercise.note1.key, currentExercise.note1.accidental);
+                const freq2 = keyToFrequency(currentExercise.note2.key, currentExercise.note2.accidental);
+
+                playTone(freq1, now, 0.7);
+                playTone(freq2, now + 0.6, 0.9);
             }
 
             function renderIntervalButtons() {
@@ -273,7 +344,9 @@
                 document.getElementById('game-screen').classList.remove('hidden');
                 document.getElementById('current-difficulty').innerText = difficulty;
 
-                nextInterval();
+                setTimeout(() => {
+                    nextInterval();
+                }, 50);
             }
 
             function selectInterval(id, element) {
@@ -302,6 +375,7 @@
                 generateExercise();
                 renderStave();
                 startTimer();
+                playAudio();
             }
 
             function resetState() {
@@ -314,7 +388,7 @@
                 timerDisplay.className = 'text-green-500 font-bold';
 
                 document.getElementById('feedback-message').innerText = '';
-                document.getElementById('stave-wrapper').className = 'stave-wrapper p-4 flex flex-col items-center justify-center min-h-[160px] relative overflow-hidden';
+                document.getElementById('stave-wrapper').className = 'stave-wrapper p-4 flex flex-col items-center justify-center min-h-[180px] relative overflow-hidden';
                 
                 document.querySelectorAll('.btn-interval').forEach(b => {
                     b.classList.remove('selected');
@@ -344,7 +418,7 @@
 
             function generateExercise() {
                 const pool = currentDifficulty === 'inicial' 
-                    ? ['2M', '3M', '4P', '5P', '6M', '7M', '8P']
+                    ? ['1P', '2M', '3M', '4P', '5P', '6M', '7M', '8P']
                     : allIntervals.map(i => i.id);
 
                 const chosenInterval = pool[Math.floor(Math.random() * pool.length)];
@@ -354,28 +428,14 @@
                     dir = Math.random() > 0.5 ? 'ascendente' : 'descendente';
                 }
 
-                // Generació d'exercici
                 if (chosenInterval === '3M') {
-                    currentExercise = {
-                        note1: { key: "c/4", accidental: null },
-                        note2: { key: "e/4", accidental: null },
-                        type: '3M',
-                        direction: dir
-                    };
+                    currentExercise = { note1: { key: "c/4", accidental: null }, note2: { key: "e/4", accidental: null }, type: '3M', direction: dir };
                 } else if (chosenInterval === '2m') {
-                    currentExercise = {
-                        note1: { key: "c/4", accidental: null },
-                        note2: { key: "d/4", accidental: "b" },
-                        type: '2m',
-                        direction: dir
-                    };
+                    currentExercise = { note1: { key: "c/4", accidental: null }, note2: { key: "d/4", accidental: "b" }, type: '2m', direction: dir };
+                } else if (chosenInterval === '1P') {
+                    currentExercise = { note1: { key: "c/4", accidental: null }, note2: { key: "c/4", accidental: null }, type: '1P', direction: dir };
                 } else {
-                    currentExercise = {
-                        note1: { key: "c/4", accidental: null },
-                        note2: { key: "g/4", accidental: null },
-                        type: '5P',
-                        direction: dir
-                    };
+                    currentExercise = { note1: { key: "c/4", accidental: null }, note2: { key: "g/4", accidental: null }, type: '5P', direction: dir };
                 }
 
                 if (dir === 'descendente') {
@@ -385,47 +445,61 @@
                 }
             }
 
+            // RENDERING AMB API OFICIAL VEXFLOW v4 (Factory Pattern)
             function renderStave() {
                 const container = document.getElementById('stave-display');
                 container.innerHTML = '';
 
-                if (typeof Vex !== 'undefined') {
+                if (typeof Vex === 'undefined' || !Vex.Flow) {
+                    container.innerHTML = '<span class="text-red-400 text-xs">Error en la llibreria de partitures.</span>';
+                    return;
+                }
+
+                try {
                     const VF = Vex.Flow;
-                    const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
-                    renderer.resize(280, 140);
                     
+                    // Inicialitzador amb la Factory API de VexFlow v4 (compatible amb dark mode)
+                    const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
+                    renderer.resize(260, 140);
                     const context = renderer.getContext();
+
+                    // Aplicar colors blancs per a les línies del fons fosc
                     context.setFillStyle("#f3f4f6");
                     context.setStrokeStyle("#f3f4f6");
 
-                    const stave = new VF.Stave(10, 10, 250);
-                    stave.setContext(context);
+                    const stave = new VF.Stave(10, 10, 240);
                     stave.addClef("treble");
+                    stave.setContext(context);
+                    
+                    // Assignar estil blanc al pentagrama
+                    stave.setStyle({ strokeStyle: "#f3f4f6", fillStyle: "#f3f4f6" });
                     stave.draw();
 
-                    // Creació de la 1a nota
-                    const note1 = new VF.StaveNote({ keys: [currentExercise.note1.key], duration: "h" });
+                    // Creació de notes amb VexFlow v4
+                    const n1 = new VF.StaveNote({ keys: [currentExercise.note1.key], duration: "h" });
                     if (currentExercise.note1.accidental) {
-                        note1.addModifier(new VF.Accidental(currentExercise.note1.accidental));
+                        n1.addModifier(new VF.Accidental(currentExercise.note1.accidental));
                     }
 
-                    // Creació de la 2a nota
-                    const note2 = new VF.StaveNote({ keys: [currentExercise.note2.key], duration: "h" });
+                    const n2 = new VF.StaveNote({ keys: [currentExercise.note2.key], duration: "h" });
                     if (currentExercise.note2.accidental) {
-                        note2.addModifier(new VF.Accidental(currentExercise.note2.accidental));
+                        n2.addModifier(new VF.Accidental(currentExercise.note2.accidental));
                     }
 
-                    note1.setStyle({ fillStyle: "#f3f4f6", strokeStyle: "#f3f4f6" });
-                    note2.setStyle({ fillStyle: "#f3f4f6", strokeStyle: "#f3f4f6" });
+                    // Forçar color blanc a les pliques i caps de nota
+                    n1.setStyle({ fillStyle: "#f3f4f6", strokeStyle: "#f3f4f6" });
+                    n2.setStyle({ fillStyle: "#f3f4f6", strokeStyle: "#f3f4f6" });
 
+                    // Formatació i alineació de la veu
                     const voice = new VF.Voice({ num_beats: 4, beat_value: 4 });
-                    voice.addTickables([note1, note2]);
+                    voice.addTickables([n1, n2]);
 
-                    const formatter = new VF.Formatter();
-                    formatter.joinVoices([voice]);
-                    formatter.format([voice], 160);
-                    
+                    const formatter = new VF.Formatter().joinVoices([voice]);
+                    formatter.format([voice], 140);
+
                     voice.draw(context, stave);
+                } catch (e) {
+                    console.error("VexFlow Error:", e);
                 }
             }
 
@@ -476,6 +550,7 @@
                 selectDirection,
                 checkAnswer,
                 nextInterval,
+                playAudio,
                 returnToMenu
             };
         })();
