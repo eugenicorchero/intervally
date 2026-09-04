@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Intervally - Entrenador Visual d'Intervals Musicals</title>
-    <meta name="description" content="Aplicació web moderna per a aprendre i practicar intervals musicals de forma visual i auditiva.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inclusió oficial de VexFlow v4.2.3 -->
-    <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.3/build/iife/vexflow-min.js"></script>
+    <!-- VexFlow CDN (Versió Estable 3.0.9) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vexflow/3.0.9/vexflow-min.js"></script>
 
     <style>
         :root {
@@ -34,17 +33,6 @@
             border: 2px solid rgba(255, 255, 255, 0.1);
             box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4), 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             border-radius: 1rem;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .stave-success {
-            border-color: #22c55e !important;
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3) !important;
-        }
-
-        .stave-error {
-            border-color: #ef4444 !important;
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3) !important;
         }
 
         .btn-interval {
@@ -55,33 +43,19 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             color: #e5e7eb;
             transition: all 0.15s ease;
-            user-select: none;
         }
 
         .btn-interval:hover:not(:disabled) {
             background-color: #374151;
             border-color: #3b82f6;
-            transform: translateY(-2px);
         }
 
         .btn-interval.selected {
             background-color: #2563eb !important;
             border-color: #60a5fa !important;
             color: #ffffff !important;
-            box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
         }
 
-        .timer-warning {
-            color: #ef4444 !important;
-            animation: pulse-timer 1s infinite;
-        }
-
-        @keyframes pulse-timer {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.1); }
-        }
-
-        /* Assegura que les línies del SVG de VexFlow siguin visibles */
         #stave-display svg {
             margin: 0 auto;
         }
@@ -105,33 +79,18 @@
         <!-- PANTALLA D'INICI -->
         <section id="start-screen" class="bg-gray-800/60 backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-gray-700/50 shadow-2xl text-center my-auto">
             <h2 class="text-2xl font-bold mb-2 text-white">Tria el teu Nivell de Pràctica</h2>
-            <p class="text-gray-400 mb-6 max-w-md mx-auto text-sm">
-                Practica la identificació d'intervals musicals de forma visual i auditiva. Tens 30 segons per resposta.
-            </p>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-                <button onclick="IntervallyApp.startGame('inicial')" 
-                    class="p-5 bg-gradient-to-b from-gray-800 to-gray-900 border border-blue-500/30 hover:border-blue-500 rounded-xl hover:shadow-lg transition text-left">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="font-bold text-lg text-blue-400">Inicial</span>
-                    </div>
-                    <p class="text-xs text-gray-400">(Ascendent: Intervals bàsics sense alteracions)</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto mt-6">
+                <button onclick="IntervallyApp.startGame('inicial')" class="p-5 bg-gray-900 border border-blue-500/30 hover:border-blue-500 rounded-xl text-left">
+                    <span class="font-bold text-lg text-blue-400">Inicial</span>
+                    <p class="text-xs text-gray-400 mt-1">(Intervals bàsics)</p>
                 </button>
-
-                <button onclick="IntervallyApp.startGame('intermedio')" 
-                    class="p-5 bg-gradient-to-b from-gray-800 to-gray-900 border border-indigo-500/30 hover:border-indigo-500 rounded-xl hover:shadow-lg transition text-left">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="font-bold text-lg text-indigo-400">Intermedi</span>
-                    </div>
-                    <p class="text-xs text-gray-400">(Ascendent: Tots els intervals amb alteracions)</p>
+                <button onclick="IntervallyApp.startGame('intermedio')" class="p-5 bg-gray-900 border border-indigo-500/30 hover:border-indigo-500 rounded-xl text-left">
+                    <span class="font-bold text-lg text-indigo-400">Intermedi</span>
+                    <p class="text-xs text-gray-400 mt-1">(Tots els intervals)</p>
                 </button>
-
-                <button onclick="IntervallyApp.startGame('dificil')" 
-                    class="p-5 bg-gradient-to-b from-gray-800 to-gray-900 border border-purple-500/30 hover:border-purple-500 rounded-xl hover:shadow-lg transition text-left">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="font-bold text-lg text-purple-400">Difícil</span>
-                    </div>
-                    <p class="text-xs text-gray-400">(Ascendent/Descendent: Tots els intervals)</p>
+                <button onclick="IntervallyApp.startGame('dificil')" class="p-5 bg-gray-900 border border-purple-500/30 hover:border-purple-500 rounded-xl text-left">
+                    <span class="font-bold text-lg text-purple-400">Difícil</span>
+                    <p class="text-xs text-gray-400 mt-1">(Ascendent / Descendent)</p>
                 </button>
             </div>
         </section>
@@ -139,74 +98,28 @@
         <!-- PANTALLA DE JOC -->
         <section id="game-screen" class="hidden flex-1 flex flex-col justify-between gap-4">
             
-            <div class="flex items-center justify-between bg-gray-800/80 border border-gray-700/60 px-4 py-2.5 rounded-xl text-sm">
-                <button onclick="IntervallyApp.returnToMenu()" class="flex items-center gap-1.5 text-gray-400 hover:text-white transition font-medium text-xs sm:text-sm">
-                    ← Menú
-                </button>
-
-                <div class="flex items-center gap-4">
-                    <div class="text-xs sm:text-sm text-gray-400">
-                        Dificultat: <span id="current-difficulty" class="font-semibold text-blue-400 capitalize"></span>
-                    </div>
-                    <div class="text-xs sm:text-sm text-gray-400 bg-gray-900/60 px-3 py-1 rounded-lg border border-gray-700">
-                        Puntuació: <span id="score-correct" class="font-bold text-green-400">0</span>/<span id="score-total" class="font-bold text-gray-200">0</span>
-                    </div>
+            <div class="flex items-center justify-between bg-gray-800/80 px-4 py-2.5 rounded-xl text-sm">
+                <button onclick="IntervallyApp.returnToMenu()" class="text-gray-400 hover:text-white text-xs sm:text-sm">← Menú</button>
+                <div class="text-xs sm:text-sm text-gray-400">
+                    Dificultat: <span id="current-difficulty" class="font-semibold text-blue-400 capitalize"></span>
                 </div>
-
-                <div class="flex items-center gap-1.5 font-mono text-base font-bold">
-                    <span class="text-xs text-gray-400 font-sans font-normal">Temps:</span>
-                    <span id="timer-display" class="text-green-400">30</span>
+                <div class="text-xs sm:text-sm text-gray-400">
+                    Puntuació: <span id="score-correct" class="font-bold text-green-400">0</span>/<span id="score-total" class="font-bold text-gray-200">0</span>
                 </div>
             </div>
 
             <!-- VISUALITZADOR DE PARTITURA -->
-            <div class="stave-wrapper p-4 flex flex-col items-center justify-center min-h-[180px] relative overflow-hidden" id="stave-wrapper">
+            <div class="stave-wrapper p-4 flex flex-col items-center justify-center min-h-[180px] relative" id="stave-wrapper">
                 <div id="stave-display" class="w-full flex justify-center items-center"></div>
-                
-                <button onclick="IntervallyApp.playAudio()" title="Escolta l'interval"
-                    class="absolute top-3 right-3 bg-gray-900/80 hover:bg-blue-600 text-gray-300 hover:text-white border border-gray-700 hover:border-blue-400 p-2 rounded-xl transition duration-200 flex items-center gap-1.5 text-xs font-semibold shadow-lg">
-                    <span>🔊</span>
-                    <span class="hidden sm:inline">Escolta</span>
-                </button>
             </div>
 
-            <!-- PANELS DE CONTROL -->
+            <!-- BOTONS -->
             <div class="space-y-4">
-                
-                <!-- Direcció -->
-                <div id="direction-container" class="grid grid-cols-2 gap-2 p-1 bg-gray-900/80 rounded-xl border border-gray-800">
-                    <button id="btn-ascendente" onclick="IntervallyApp.selectDirection('ascendente')"
-                        class="py-2 text-xs font-semibold rounded-lg text-white bg-blue-600 transition">
-                        Ascendent
-                    </button>
-                    <button id="btn-descendente" onclick="IntervallyApp.selectDirection('descendente')"
-                        class="py-2 text-xs font-semibold rounded-lg text-gray-400 bg-transparent transition">
-                        Descendent
-                    </button>
-                </div>
-
-                <!-- Botons d'Intervals -->
-                <div>
-                    <h3 class="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider text-center">
-                        Selecciona la Resposta
-                    </h3>
-                    <div id="interval-buttons-container" class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-                    </div>
-                </div>
-
-                <!-- Feedback Visual -->
-                <div id="feedback-message" class="text-center min-h-[24px] font-semibold text-sm transition-all duration-200"></div>
-
-                <!-- Botons d'Acció -->
+                <div id="interval-buttons-container" class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2"></div>
+                <div id="feedback-message" class="text-center min-h-[24px] font-semibold text-sm"></div>
                 <div class="flex gap-3">
-                    <button id="btn-check" onclick="IntervallyApp.checkAnswer()" disabled
-                        class="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-600 border border-blue-400/30 text-white shadow-lg transition duration-150">
-                        Comprova
-                    </button>
-                    <button id="btn-next" onclick="IntervallyApp.nextInterval()" disabled
-                        class="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-gray-700 hover:bg-gray-600 disabled:opacity-40 text-white transition duration-150">
-                        Següent
-                    </button>
+                    <button id="btn-check" onclick="IntervallyApp.checkAnswer()" disabled class="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-blue-600 disabled:bg-gray-800 text-white">Comprova</button>
+                    <button id="btn-next" onclick="IntervallyApp.nextInterval()" disabled class="flex-1 py-3 px-4 rounded-xl font-bold text-sm bg-gray-700 disabled:opacity-40 text-white">Següent</button>
                 </div>
             </div>
 
@@ -214,26 +127,11 @@
 
     </div>
 
-    <footer class="text-center text-gray-500 text-xs py-4 mt-auto">
-        &copy; Eugeni Corchero 2025
-    </footer>
-
     <script>
         const IntervallyApp = (function() {
             let score = { correct: 0, total: 0 };
-            let timer = null;
-            let timeLeft = 30;
-            let currentDifficulty = 'inicial';
             let selectedInterval = null;
-            let selectedDirection = 'ascendente';
-            let audioCtx = null;
-            
-            let currentExercise = {
-                note1: { key: "c/4", accidental: null },
-                note2: { key: "g/4", accidental: null },
-                type: '5P',
-                direction: 'ascendente'
-            };
+            let currentExercise = { note1: "c/4", note2: "g/4", type: '5P' };
 
             const allIntervals = [
                 { id: '1P', name: 'Uníson' },
@@ -242,317 +140,116 @@
                 { id: '3m', name: '3ª menor' },
                 { id: '3M', name: '3ª Major' },
                 { id: '4P', name: '4ª Justa' },
-                { id: '4A', name: '4ª Aug.' },
                 { id: '5P', name: '5ª Justa' },
-                { id: '6m', name: '6ª menor' },
-                { id: '6M', name: '6ª Major' },
-                { id: '7m', name: '7ª menor' },
-                { id: '7M', name: '7ª Major' },
                 { id: '8P', name: '8ª Justa' }
             ];
 
             function init() {
-                renderIntervalButtons();
+                renderButtons();
             }
 
-            function getAudioContext() {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                return audioCtx;
-            }
-
-            function keyToFrequency(vexKey, accidental) {
-                const parts = vexKey.split('/');
-                const noteName = parts[0].toLowerCase();
-                const octave = parseInt(parts[1], 10);
-
-                const baseNotes = { 'c': 0, 'd': 2, 'e': 4, 'f': 5, 'g': 7, 'a': 9, 'b': 11 };
-                let semitones = baseNotes[noteName] || 0;
-
-                if (accidental === '#') semitones += 1;
-                if (accidental === 'b') semitones -= 1;
-
-                const midiNum = (octave + 1) * 12 + semitones;
-                return 440 * Math.pow(2, (midiNum - 69) / 12);
-            }
-
-            function playTone(freq, startTime, duration = 0.8) {
-                try {
-                    const ctx = getAudioContext();
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(freq, startTime);
-
-                    gain.gain.setValueAtTime(0, startTime);
-                    gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
-                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-
-                    osc.start(startTime);
-                    osc.stop(startTime + duration);
-                } catch (e) {
-                    console.log("Audio Error:", e);
-                }
-            }
-
-            function playAudio() {
-                const ctx = getAudioContext();
-                const now = ctx.currentTime;
-
-                const freq1 = keyToFrequency(currentExercise.note1.key, currentExercise.note1.accidental);
-                const freq2 = keyToFrequency(currentExercise.note2.key, currentExercise.note2.accidental);
-
-                playTone(freq1, now, 0.7);
-                playTone(freq2, now + 0.6, 0.9);
-            }
-
-            function renderIntervalButtons() {
+            function renderButtons() {
                 const container = document.getElementById('interval-buttons-container');
                 container.innerHTML = '';
-                
                 allIntervals.forEach(item => {
                     const btn = document.createElement('button');
                     btn.className = 'btn-interval text-xs sm:text-sm';
                     btn.innerText = item.name;
-                    btn.onclick = () => selectInterval(item.id, btn);
+                    btn.onclick = () => {
+                        selectedInterval = item.id;
+                        document.querySelectorAll('.btn-interval').forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        document.getElementById('btn-check').disabled = false;
+                    };
                     container.appendChild(btn);
                 });
             }
 
             function startGame(difficulty) {
-                currentDifficulty = difficulty;
-                score = { correct: 0, total: 0 };
-                updateScoreUI();
-
-                const dirContainer = document.getElementById('direction-container');
-                if (difficulty === 'dificil') {
-                    dirContainer.classList.remove('opacity-50', 'pointer-events-none');
-                } else {
-                    dirContainer.classList.add('opacity-50', 'pointer-events-none');
-                    selectDirection('ascendente');
-                }
-
                 document.getElementById('start-screen').classList.add('hidden');
                 document.getElementById('game-screen').classList.remove('hidden');
                 document.getElementById('current-difficulty').innerText = difficulty;
-
-                setTimeout(() => {
-                    nextInterval();
-                }, 50);
-            }
-
-            function selectInterval(id, element) {
-                selectedInterval = id;
-                document.querySelectorAll('.btn-interval').forEach(b => b.classList.remove('selected'));
-                element.classList.add('selected');
-                document.getElementById('btn-check').disabled = false;
-            }
-
-            function selectDirection(dir) {
-                selectedDirection = dir;
-                const btnAsc = document.getElementById('btn-ascendente');
-                const btnDesc = document.getElementById('btn-descendente');
-
-                if (dir === 'ascendente') {
-                    btnAsc.className = "py-2 text-xs font-semibold rounded-lg text-white bg-blue-600 transition";
-                    btnDesc.className = "py-2 text-xs font-semibold rounded-lg text-gray-400 bg-transparent transition";
-                } else {
-                    btnDesc.className = "py-2 text-xs font-semibold rounded-lg text-white bg-blue-600 transition";
-                    btnAsc.className = "py-2 text-xs font-semibold rounded-lg text-gray-400 bg-transparent transition";
-                }
+                nextInterval();
             }
 
             function nextInterval() {
-                resetState();
-                generateExercise();
-                renderStave();
-                startTimer();
-                playAudio();
-            }
-
-            function resetState() {
-                clearInterval(timer);
-                timeLeft = 30;
-                selectedInterval = null;
-                
-                const timerDisplay = document.getElementById('timer-display');
-                timerDisplay.innerText = '30';
-                timerDisplay.className = 'text-green-500 font-bold';
-
                 document.getElementById('feedback-message').innerText = '';
-                document.getElementById('stave-wrapper').className = 'stave-wrapper p-4 flex flex-col items-center justify-center min-h-[180px] relative overflow-hidden';
-                
-                document.querySelectorAll('.btn-interval').forEach(b => {
-                    b.classList.remove('selected');
-                    b.disabled = false;
-                });
-
                 document.getElementById('btn-check').disabled = true;
                 document.getElementById('btn-next').disabled = true;
-            }
-
-            function startTimer() {
-                const display = document.getElementById('timer-display');
-                timer = setInterval(() => {
-                    timeLeft--;
-                    display.innerText = timeLeft;
-                    
-                    if (timeLeft <= 10) {
-                        display.className = 'timer-warning font-bold';
-                    }
-                    
-                    if (timeLeft <= 0) {
-                        clearInterval(timer);
-                        checkAnswer(true);
-                    }
-                }, 1000);
-            }
-
-            function generateExercise() {
-                const pool = currentDifficulty === 'inicial' 
-                    ? ['1P', '2M', '3M', '4P', '5P', '6M', '7M', '8P']
-                    : allIntervals.map(i => i.id);
-
-                const chosenInterval = pool[Math.floor(Math.random() * pool.length)];
+                document.querySelectorAll('.btn-interval').forEach(b => b.classList.remove('selected'));
                 
-                let dir = 'ascendente';
-                if (currentDifficulty === 'dificil') {
-                    dir = Math.random() > 0.5 ? 'ascendente' : 'descendente';
-                }
-
-                if (chosenInterval === '3M') {
-                    currentExercise = { note1: { key: "c/4", accidental: null }, note2: { key: "e/4", accidental: null }, type: '3M', direction: dir };
-                } else if (chosenInterval === '2m') {
-                    currentExercise = { note1: { key: "c/4", accidental: null }, note2: { key: "d/4", accidental: "b" }, type: '2m', direction: dir };
-                } else if (chosenInterval === '1P') {
-                    currentExercise = { note1: { key: "c/4", accidental: null }, note2: { key: "c/4", accidental: null }, type: '1P', direction: dir };
-                } else {
-                    currentExercise = { note1: { key: "c/4", accidental: null }, note2: { key: "g/4", accidental: null }, type: '5P', direction: dir };
-                }
-
-                if (dir === 'descendente') {
-                    const temp = currentExercise.note1;
-                    currentExercise.note1 = currentExercise.note2;
-                    currentExercise.note2 = temp;
-                }
+                // Renderitzar la partitura directament
+                renderStaveOriginal();
             }
 
-            // RENDERING AMB API OFICIAL VEXFLOW v4 (Factory Pattern)
-            function renderStave() {
+            // MÈTODE ORIGINAL RESTRUCTURAT I SENSE ERRORS
+            function renderStaveOriginal() {
                 const container = document.getElementById('stave-display');
                 container.innerHTML = '';
 
-                if (typeof Vex === 'undefined' || !Vex.Flow) {
-                    container.innerHTML = '<span class="text-red-400 text-xs">Error en la llibreria de partitures.</span>';
+                if (typeof Vex === 'undefined') {
+                    console.error("VexFlow no carregat");
                     return;
                 }
 
-                try {
-                    const VF = Vex.Flow;
-                    
-                    // Inicialitzador amb la Factory API de VexFlow v4 (compatible amb dark mode)
-                    const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
-                    renderer.resize(260, 140);
-                    const context = renderer.getContext();
+                const VF = Vex.Flow;
+                const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
+                renderer.resize(250, 130);
+                const context = renderer.getContext();
 
-                    // Aplicar colors blancs per a les línies del fons fosc
-                    context.setFillStyle("#f3f4f6");
-                    context.setStrokeStyle("#f3f4f6");
+                // Estil clar per al fons fosc
+                context.setFillStyle("#f3f4f6");
+                context.setStrokeStyle("#f3f4f6");
 
-                    const stave = new VF.Stave(10, 10, 240);
-                    stave.addClef("treble");
-                    stave.setContext(context);
-                    
-                    // Assignar estil blanc al pentagrama
-                    stave.setStyle({ strokeStyle: "#f3f4f6", fillStyle: "#f3f4f6" });
-                    stave.draw();
+                const stave = new VF.Stave(10, 10, 230);
+                stave.addClef("treble");
+                stave.setContext(context).draw();
 
-                    // Creació de notes amb VexFlow v4
-                    const n1 = new VF.StaveNote({ keys: [currentExercise.note1.key], duration: "h" });
-                    if (currentExercise.note1.accidental) {
-                        n1.addModifier(new VF.Accidental(currentExercise.note1.accidental));
-                    }
+                // Dibuix directe de les dues notes del pentagrama
+                const notes = [
+                    new VF.StaveNote({ keys: [currentExercise.note1], duration: "h" }),
+                    new VF.StaveNote({ keys: [currentExercise.note2], duration: "h" })
+                ];
 
-                    const n2 = new VF.StaveNote({ keys: [currentExercise.note2.key], duration: "h" });
-                    if (currentExercise.note2.accidental) {
-                        n2.addModifier(new VF.Accidental(currentExercise.note2.accidental));
-                    }
+                // Aplicar estil blanc a les notes
+                notes.forEach(note => {
+                    note.setStyle({ fillStyle: "#f3f4f6", strokeStyle: "#f3f4f6" });
+                });
 
-                    // Forçar color blanc a les pliques i caps de nota
-                    n1.setStyle({ fillStyle: "#f3f4f6", strokeStyle: "#f3f4f6" });
-                    n2.setStyle({ fillStyle: "#f3f4f6", strokeStyle: "#f3f4f6" });
+                const voice = new VF.Voice({ num_beats: 4, beat_value: 4 });
+                voice.addTickables(notes);
 
-                    // Formatació i alineació de la veu
-                    const voice = new VF.Voice({ num_beats: 4, beat_value: 4 });
-                    voice.addTickables([n1, n2]);
+                const formatter = new VF.Formatter().joinVoices([voice]);
+                formatter.format([voice], 130);
 
-                    const formatter = new VF.Formatter().joinVoices([voice]);
-                    formatter.format([voice], 140);
-
-                    voice.draw(context, stave);
-                } catch (e) {
-                    console.error("VexFlow Error:", e);
-                }
+                voice.draw(context, stave);
             }
 
-            function checkAnswer(isTimeout = false) {
-                clearInterval(timer);
+            function checkAnswer() {
                 score.total++;
-
                 const feedback = document.getElementById('feedback-message');
-                const staveWrapper = document.getElementById('stave-wrapper');
-
-                const isCorrectInterval = selectedInterval === currentExercise.type;
-                const isCorrectDirection = (currentDifficulty !== 'dificil') || (selectedDirection === currentExercise.direction);
-
-                if (!isTimeout && isCorrectInterval && isCorrectDirection) {
+                if (selectedInterval === currentExercise.type) {
                     score.correct++;
                     feedback.innerText = "✨ Correcte!";
                     feedback.className = "text-center min-h-[24px] font-bold text-sm text-green-400";
-                    staveWrapper.classList.add('stave-success');
                 } else {
-                    const correctObj = allIntervals.find(i => i.id === currentExercise.type);
-                    feedback.innerText = isTimeout 
-                        ? `⏰ Temps esgotat! Era ${correctObj.name} (${currentExercise.direction})` 
-                        : `❌ Incorrecte. Era ${correctObj.name} (${currentExercise.direction})`;
+                    feedback.innerText = "❌ Incorrecte!";
                     feedback.className = "text-center min-h-[24px] font-bold text-sm text-red-400";
-                    staveWrapper.classList.add('stave-error');
                 }
-
-                updateScoreUI();
+                document.getElementById('score-correct').innerText = score.correct;
+                document.getElementById('score-total').innerText = score.total;
                 document.getElementById('btn-check').disabled = true;
                 document.getElementById('btn-next').disabled = false;
             }
 
-            function updateScoreUI() {
-                document.getElementById('score-correct').innerText = score.correct;
-                document.getElementById('score-total').innerText = score.total;
-            }
-
             function returnToMenu() {
-                clearInterval(timer);
                 document.getElementById('game-screen').classList.add('hidden');
                 document.getElementById('start-screen').classList.remove('hidden');
             }
 
             window.addEventListener('DOMContentLoaded', init);
 
-            return {
-                startGame,
-                selectDirection,
-                checkAnswer,
-                nextInterval,
-                playAudio,
-                returnToMenu
-            };
+            return { startGame, checkAnswer, nextInterval, returnToMenu };
         })();
     </script>
 </body>
