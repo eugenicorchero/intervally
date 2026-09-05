@@ -168,13 +168,16 @@ function setupVexFlowRenderer(VF) {
         const container = DOM.staveDisplayContainer;
         if (!container) return;
         container.innerHTML = '';
-        const width = Math.max(280, Math.min(DOM.staveContainer.clientWidth - 20, 600));
+        
+        const containerWidth = DOM.staveContainer.clientWidth || 300;
+        const width = Math.max(240, containerWidth - 10);
+        const height = 110;
 
         const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
-        renderer.resize(width, 120);
+        renderer.resize(width, height);
         const context = renderer.getContext();
 
-        const stave = new VF.Stave(10, 0, width - 20);
+        const stave = new VF.Stave(5, 0, width - 10);
         stave.addClef('treble').setContext(context).draw();
 
         AppState.vexFlow = { renderer, context, stave, VF };
@@ -190,13 +193,16 @@ function drawInterval(note1VF, note2VF) {
     const { VF } = AppState.vexFlow;
     try {
         container.innerHTML = '';
-        const width = Math.max(280, Math.min(DOM.staveContainer.clientWidth - 20, 600));
+        
+        const containerWidth = DOM.staveContainer.clientWidth || 300;
+        const width = Math.max(240, containerWidth - 10);
+        const height = 110;
 
         const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
-        renderer.resize(width, 120);
+        renderer.resize(width, height);
         const context = renderer.getContext();
 
-        const stave = new VF.Stave(10, 0, width - 20);
+        const stave = new VF.Stave(5, 0, width - 10);
         stave.addClef('treble').setContext(context).draw();
 
         const note1 = new VF.StaveNote({ clef: 'treble', keys: [note1VF.key], duration: 'q' });
@@ -208,7 +214,7 @@ function drawInterval(note1VF, note2VF) {
         const voice = new VF.Voice({ num_beats: 2, beat_value: 4 }).setStrict(false);
         voice.addTickables([note1, note2]);
 
-        new VF.Formatter().joinVoices([voice]).format([voice], width - 60);
+        new VF.Formatter().joinVoices([voice]).format([voice], width - 50);
         voice.draw(context, stave);
     } catch (e) {
         console.error("Error dibuixant interval:", e);
@@ -359,11 +365,11 @@ function updateScore(isCorrect) {
 function displayFeedback(isCorrect, correctIntervalName, isDirectionChecked, correctDirection) {
     if (isCorrect) {
         DOM.feedbackMessage.textContent = "¡CORRECTE! 🥳";
-        DOM.feedbackMessage.className = 'text-center h-8 font-bold text-lg text-green-500';
+        DOM.feedbackMessage.className = 'text-center h-6 font-bold text-sm sm:text-base text-green-500';
     } else {
         const dirText = isDirectionChecked ? `, ${correctDirection === 'ascendente' ? 'Ascendent' : 'Descendent'}` : '';
         DOM.feedbackMessage.textContent = `INCORRECTE. Era: ${correctIntervalName}${dirText}.`;
-        DOM.feedbackMessage.className = 'text-center h-8 font-bold text-lg text-red-500';
+        DOM.feedbackMessage.className = 'text-center h-6 font-bold text-sm sm:text-base text-red-500';
     }
 }
 
@@ -402,7 +408,7 @@ function startTimer() {
     stopTimer();
     AppState.timer = 30;
     DOM.timerDisplay.textContent = AppState.timer;
-    DOM.timerDisplay.className = 'timer-display font-mono font-bold text-lg text-green-400';
+    DOM.timerDisplay.className = 'timer-display font-mono font-bold text-base sm:text-lg text-green-400';
 
     AppState.timerId = setInterval(() => {
         AppState.timer--;
@@ -432,7 +438,7 @@ function generateButtons() {
         btn.id = `interval-${interval.semitones}`;
         btn.textContent = interval.btnName;
         btn.onclick = () => IntervallyApp.selectInterval(interval.semitones);
-        btn.className = 'interval-button interval-button-choice p-2 rounded-lg font-semibold text-xs sm:text-sm bg-gray-700 hover:bg-gray-600 text-white transition border-2 border-transparent';
+        btn.className = 'interval-button interval-button-choice py-2.5 px-1 rounded-lg font-bold text-xs sm:text-sm bg-gray-700 hover:bg-gray-600 active:bg-gray-800 text-white transition border-2 border-transparent shadow';
         container.appendChild(btn);
     });
 }
@@ -469,6 +475,18 @@ function init() {
     }
     switchView('start');
 }
+
+// Re-dibuixa si l'alumnat gira el mòbil o canvia de mida
+window.addEventListener('resize', () => {
+    if (AppState.isVexFlowLoaded && AppState.startNoteMIDI !== null) {
+        const { startVF, endVF } = getIntervalNoteRenderData(
+            AppState.startNoteMIDI, 
+            AppState.currentIntervalSemitones, 
+            AppState.currentDirection
+        );
+        drawInterval(startVF, endVF);
+    }
+});
 
 document.addEventListener('DOMContentLoaded', init);
 if (typeof window !== 'undefined') window.IntervallyApp = IntervallyApp;
