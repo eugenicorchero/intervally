@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ca" class="h-full">
+<html lang="ca" class="h-full bg-gray-900">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Intervally - Entrenament d'Intervals Musicals</title>
 
     <!-- Tailwind CSS -->
@@ -12,29 +12,27 @@
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
 
     <style>
-        .timer-display {
-            font-variant-numeric: tabular-nums;
-        }
-        #stave-display svg {
-            margin: 0 auto;
-        }
+        .timer-display { font-variant-numeric: tabular-nums; }
+        #stave-display svg { margin: 0 auto; max-width: 100%; height: auto; }
+        /* Millora de l'àrea tàctil en mòbil */
+        button { touch-action: manipulation; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans min-h-full flex flex-col justify-between">
+<body class="bg-gray-900 text-gray-100 font-sans min-h-full flex flex-col justify-between select-none">
 
-    <!-- HEADER (Nivell / Títol principal) -->
-    <header id="main-header" class="w-full max-w-2xl mx-auto px-4 pt-6 text-center">
-        <h1 class="text-3xl font-extrabold text-blue-400">Intervally</h1>
-        <p class="text-gray-400 text-sm mt-1">Aprendre a llegir intervals a la partitura</p>
+    <!-- HEADER -->
+    <header id="main-header" class="w-full max-w-xl mx-auto px-4 pt-4 sm:pt-6 text-center">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-blue-400">Intervally</h1>
+        <p class="text-gray-400 text-xs sm:text-sm mt-0.5">Aprendre a llegir intervals a la partitura</p>
     </header>
 
-    <!-- PANTALLA D'INICI (Selecció de Nivells) -->
-    <section id="start-screen" class="max-w-md w-full mx-auto px-4 my-auto">
-        <div class="bg-gray-800 rounded-xl p-6 shadow-xl border border-gray-700 text-center">
-            <h2 class="text-2xl font-bold mb-4 text-white">Tria un Nivell</h2>
+    <!-- PANTALLA D'INICI -->
+    <section id="start-screen" class="max-w-md w-full mx-auto px-4 my-auto py-4">
+        <div class="bg-gray-800 rounded-xl p-5 sm:p-6 shadow-xl border border-gray-700 text-center">
+            <h2 class="text-xl sm:text-2xl font-bold mb-4 text-white">Tria un Nivell</h2>
             <div class="space-y-3">
                 <button onclick="IntervallyApp.startGame('inicial')"
-                        class="w-full py-3 px-4 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition border border-green-500 shadow-md">
+                        class="w-full py-3 px-4 bg-green-600 active:bg-green-700 hover:bg-green-500 text-white font-bold rounded-lg transition border border-green-500 shadow-md text-sm sm:text-base">
                     Nivell 1: Inicial
                     <span class="block text-xs font-normal text-green-200 mt-0.5">
                         Ascendent | Intervals Majors i Justos
@@ -42,7 +40,7 @@
                 </button>
 
                 <button onclick="IntervallyApp.startGame('intermedio')"
-                        class="w-full py-3 px-4 bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-lg transition border border-yellow-500 shadow-md">
+                        class="w-full py-3 px-4 bg-yellow-600 active:bg-yellow-700 hover:bg-yellow-500 text-white font-bold rounded-lg transition border border-yellow-500 shadow-md text-sm sm:text-base">
                     Nivell 2: Intermedi
                     <span class="block text-xs font-normal text-yellow-200 mt-0.5">
                         Ascendent i Descendent | Intervals Majors i Justos
@@ -50,7 +48,7 @@
                 </button>
 
                 <button onclick="IntervallyApp.startGame('dificil')"
-                        class="w-full py-3 px-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg transition border border-red-500 shadow-md">
+                        class="w-full py-3 px-4 bg-red-600 active:bg-red-700 hover:bg-red-500 text-white font-bold rounded-lg transition border border-red-500 shadow-md text-sm sm:text-base">
                     Nivell 3: Difícil
                     <span class="block text-xs font-normal text-red-200 mt-0.5">
                         Ascendent i Descendent | Tots els Intervals (Cromàtic)
@@ -61,74 +59,75 @@
     </section>
 
     <!-- PANTALLA DE JOC -->
-    <section id="game-screen" class="max-w-xl w-full mx-auto px-4 my-auto hidden">
+    <section id="game-screen" class="max-w-xl w-full mx-auto px-3 sm:px-4 my-auto hidden flex flex-col justify-center">
+        
         <!-- Marcador i Temporitzador -->
-        <div class="flex justify-between items-center mb-3 bg-gray-800 px-4 py-2 rounded-lg border border-gray-700">
+        <div class="flex justify-between items-center mb-2 bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-700">
             <div>
-                <span class="text-xs text-gray-400 block">Nivell</span>
-                <span id="current-difficulty" class="font-bold text-blue-400 text-sm">--</span>
+                <span class="text-[10px] text-gray-400 block uppercase tracking-wider">Nivell</span>
+                <span id="current-difficulty" class="font-bold text-blue-400 text-xs sm:text-sm">--</span>
             </div>
             <div class="text-center">
-                <span class="text-xs text-gray-400 block">Temps</span>
-                <span id="timer-display" class="timer-display font-mono font-bold text-lg text-green-400">30</span>
+                <span class="text-[10px] text-gray-400 block uppercase tracking-wider">Temps</span>
+                <span id="timer-display" class="timer-display font-mono font-bold text-base sm:text-lg text-green-400">30</span>
             </div>
             <div class="text-right">
-                <span class="text-xs text-gray-400 block">Encerts</span>
-                <span class="font-bold text-sm"><span id="score-correct" class="text-green-400">0</span> / <span id="score-total">0</span></span>
+                <span class="text-[10px] text-gray-400 block uppercase tracking-wider">Encerts</span>
+                <span class="font-bold text-xs sm:text-sm"><span id="score-correct" class="text-green-400">0</span> / <span id="score-total">0</span></span>
             </div>
         </div>
 
-        <!-- Pentagrama Renderitzat amb VexFlow -->
-        <div id="stave-container" class="bg-white rounded-xl p-3 shadow-lg mb-4 text-gray-900 border border-gray-200 min-h-[140px] flex items-center justify-center">
-            <div id="stave-display" class="w-full"></div>
+        <!-- Pentagrama Renderitzat -->
+        <div id="stave-container" class="bg-white rounded-xl p-2 shadow-lg mb-2 text-gray-900 border border-gray-200 min-h-[110px] sm:min-h-[130px] flex items-center justify-center overflow-hidden">
+            <div id="stave-display" class="w-full flex justify-center"></div>
         </div>
 
-        <!-- Selecció de Direcció (Ascendent / Descendent) -->
-        <div class="flex justify-center gap-3 mb-4">
+        <!-- Selecció de Direcció -->
+        <div class="flex justify-center gap-2 mb-2">
             <button id="btn-ascendente" onclick="IntervallyApp.selectDirection('ascendente')"
-                    class="flex-1 py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm transition">
+                    class="flex-1 py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold text-xs sm:text-sm transition shadow">
                 Ascendent ↑
             </button>
             <button id="btn-descendente" onclick="IntervallyApp.selectDirection('descendente')"
-                    class="flex-1 py-2 px-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-semibold text-sm transition">
+                    class="flex-1 py-2 px-3 rounded-lg bg-gray-700 hover:bg-gray-600 active:bg-gray-800 text-white font-semibold text-xs sm:text-sm transition shadow">
                 Descendent ↓
             </button>
         </div>
 
-        <!-- Botons de Tria d'Intervals -->
-        <div id="interval-buttons-container" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4">
-            <!-- Es generen dinàmicament des de JS -->
+        <!-- Botons de Tria d'Intervals (2 col en mòbil, 4 en PC) -->
+        <div id="interval-buttons-container" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 mb-2">
+            <!-- Es generen dinàmicament -->
         </div>
 
         <!-- Mensatge de Feedback -->
-        <div id="feedback-message" class="text-center h-8 font-bold text-base mb-2"></div>
+        <div id="feedback-message" class="text-center h-6 font-bold text-sm sm:text-base mb-1"></div>
 
-        <!-- Botons d'Acció (Comprovar / Següent) -->
-        <div class="flex gap-3">
+        <!-- Botons d'Acció -->
+        <div class="flex gap-2">
             <button id="btn-check" onclick="IntervallyApp.checkAnswer()" disabled
-                    class="flex-1 py-3 bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-500 text-white font-bold rounded-lg transition shadow-md">
+                    class="flex-1 py-2.5 sm:py-3 bg-blue-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-blue-500 active:bg-blue-700 text-white font-bold rounded-lg transition shadow-md text-sm sm:text-base">
                 Comprovar
             </button>
             <button id="btn-next" onclick="IntervallyApp.nextInterval()" disabled
-                    class="flex-1 py-3 bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-600 text-white font-bold rounded-lg transition shadow-md">
+                    class="flex-1 py-2.5 sm:py-3 bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-600 active:bg-gray-800 text-white font-bold rounded-lg transition shadow-md text-sm sm:text-base">
                 Següent
             </button>
         </div>
 
         <!-- Tornar al menú -->
-        <div class="text-center mt-4">
-            <button onclick="IntervallyApp.returnToMenu()" class="text-xs text-gray-400 hover:text-white underline">
-                ← Tornar al menú principal
+        <div class="text-center mt-3">
+            <button onclick="IntervallyApp.returnToMenu()" class="text-xs text-gray-400 hover:text-white underline py-1">
+                ← Menu principal
             </button>
         </div>
     </section>
 
     <!-- FOOTER -->
-    <footer id="main-footer" class="w-full text-center py-4 text-xs text-gray-500">
+    <footer id="main-footer" class="w-full text-center py-2 text-[10px] sm:text-xs text-gray-500">
         Intervally App &copy; Entrenament de lectura musical - Eugeni Corchero
     </footer>
 
-    <!-- App Logic -->
-    <script src="app.js?v=2.0"></script>
+    <!-- Logic -->
+    <script src="app.js?v=3.0"></script>
 </body>
 </html>
