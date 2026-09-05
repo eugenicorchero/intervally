@@ -1,9 +1,5 @@
 "use strict";
 
-// =========================================================================
-// 1. CONFIGURACIÓ, ESTAT GLOBAL I CACHE D'ELEMENTS DOM
-// =========================================================================
-
 const INTERVAL_MAP = [
     { semitones: 0, name: 'Uníson', btnName: 'Uníson' },
     { semitones: 1, name: '2a menor', btnName: '2a m' },
@@ -40,8 +36,6 @@ const DIFFICULTY_CONFIG = {
     }
 };
 
-const SEMITONE_NOTE_MAP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-
 const MIN_NOTE_MIDI = 60; // C4
 const MAX_NOTE_MIDI = 81; // A5
 
@@ -58,12 +52,7 @@ const AppState = {
     totalAttempts: 0,
     correctAnswers: 0,
     isVexFlowLoaded: false,
-    vexFlow: {
-        renderer: null,
-        stave: null,
-        context: null,
-    },
-    lastVFNotes: null,
+    vexFlow: { renderer: null, stave: null, context: null }
 };
 
 const DOM = {};
@@ -93,10 +82,6 @@ function cacheDOMElements() {
     DOM.scoreCorrect = document.getElementById('score-correct');
     DOM.scoreTotal = document.getElementById('score-total');
 }
-
-// =========================================================================
-// 2. FUNCIONS DE VEXFLOW I UTILITAT MUSICAL
-// =========================================================================
 
 const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 const LETTER_BASE_SEMITONES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
@@ -151,14 +136,11 @@ function getProperEnharmonicSpelling(startSpell, intervalSemitones, direction) {
         : (startLetterIdx - steps + 7) % 7;
         
     const targetLetter = LETTERS[targetLetterIdx];
-    
     let targetOctave = startSpell.octave;
+
     if (ascending && targetLetterIdx < startLetterIdx) targetOctave++;
     if (!ascending && targetLetterIdx > startLetterIdx) targetOctave--;
-
-    if (intervalSemitones === 12) {
-        targetOctave = startSpell.octave + (ascending ? 1 : -1);
-    }
+    if (intervalSemitones === 12) targetOctave = startSpell.octave + (ascending ? 1 : -1);
 
     const startMidi = spelledToMidi(startSpell);
     const targetMidi = startMidi + (ascending ? intervalSemitones : -intervalSemitones);
@@ -175,11 +157,10 @@ function getIntervalNoteRenderData(startMidi, semitones, direction) {
     const startSpell = midiToSpelling(startMidi);
     const endSpell = getProperEnharmonicSpelling(startSpell, semitones, direction);
 
-    const startVF = { key: spellingToVexKey(startSpell), accidental: accidentalToVexSymbol(startSpell.accidental) };
-    const endVF = { key: spellingToVexKey(endSpell), accidental: accidentalToVexSymbol(endSpell.accidental) };
-
-    AppState.lastVFNotes = { startSpell, endSpell, actualInterval: semitones, direction };
-    return { startVF, endVF };
+    return { 
+        startVF: { key: spellingToVexKey(startSpell), accidental: accidentalToVexSymbol(startSpell.accidental) },
+        endVF: { key: spellingToVexKey(endSpell), accidental: accidentalToVexSymbol(endSpell.accidental) }
+    };
 }
 
 function setupVexFlowRenderer(VF) {
@@ -187,33 +168,18 @@ function setupVexFlowRenderer(VF) {
         const container = DOM.staveDisplayContainer;
         if (!container) return;
         container.innerHTML = '';
-
         const width = Math.max(280, Math.min(DOM.staveContainer.clientWidth - 20, 600));
-        const height = 120;
 
         const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
-        renderer.resize(width, height);
+        renderer.resize(width, 120);
         const context = renderer.getContext();
 
         const stave = new VF.Stave(10, 0, width - 20);
-        stave.addClef('treble');
-        stave.setContext(context).draw();
+        stave.addClef('treble').setContext(context).draw();
 
         AppState.vexFlow = { renderer, context, stave, VF };
-    } catch (error) {
-        console.error('Error inicialitzant VexFlow:', error);
-    }
-}
-
-// Funció auxiliar per afegir alteracions de forma compatible amb totes les versions de VexFlow
-function addAccidentalToNote(VF, note, index, accidentalSymbol) {
-    if (!accidentalSymbol) return;
-    
-    const accidental = new VF.Accidental(accidentalSymbol);
-    if (typeof note.addAccidental === 'function') {
-        note.addAccidental(index, accidental);
-    } else if (typeof note.addModifier === 'function') {
-        note.addModifier(accidental, index);
+    } catch (e) {
+        console.error('Error VexFlow init:', e);
     }
 }
 
@@ -225,37 +191,29 @@ function drawInterval(note1VF, note2VF) {
     try {
         container.innerHTML = '';
         const width = Math.max(280, Math.min(DOM.staveContainer.clientWidth - 20, 600));
-        const height = 120;
 
         const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
-        renderer.resize(width, height);
+        renderer.resize(width, 120);
         const context = renderer.getContext();
 
         const stave = new VF.Stave(10, 0, width - 20);
-        stave.addClef('treble');
-        stave.setContext(context).draw();
+        stave.addClef('treble').setContext(context).draw();
 
         const note1 = new VF.StaveNote({ clef: 'treble', keys: [note1VF.key], duration: 'q' });
         const note2 = new VF.StaveNote({ clef: 'treble', keys: [note2VF.key], duration: 'q' });
 
-        addAccidentalToNote(VF, note1, 0, note1VF.accidental);
-        addAccidentalToNote(VF, note2, 0, note2VF.accidental);
-
-        const notes = [note1, note2];
+        if (note1VF.accidental) note1.addModifier(new VF.Accidental(note1VF.accidental), 0);
+        if (note2VF.accidental) note2.addModifier(new VF.Accidental(note2VF.accidental), 0);
 
         const voice = new VF.Voice({ num_beats: 2, beat_value: 4 }).setStrict(false);
-        voice.addTickables(notes);
+        voice.addTickables([note1, note2]);
 
         new VF.Formatter().joinVoices([voice]).format([voice], width - 60);
         voice.draw(context, stave);
-    } catch (error) {
-        console.error("Error dibuixant interval:", error);
+    } catch (e) {
+        console.error("Error dibuixant interval:", e);
     }
 }
-
-// =========================================================================
-// 3. LÒGICA DE JOC
-// =========================================================================
 
 function switchView(viewName) {
     DOM.startScreen.classList.add('hidden');
@@ -299,15 +257,8 @@ function generateInterval() {
     AppState.currentIntervalSemitones = intervalSemitones;
     AppState.currentDirection = direction;
 
-    let validStartMin, validStartMax;
-
-    if (direction === 'descendente') {
-        validStartMin = MIN_NOTE_MIDI + intervalSemitones;
-        validStartMax = MAX_NOTE_MIDI;
-    } else {
-        validStartMin = MIN_NOTE_MIDI;
-        validStartMax = MAX_NOTE_MIDI - intervalSemitones;
-    }
+    let validStartMin = direction === 'descendente' ? MIN_NOTE_MIDI + intervalSemitones : MIN_NOTE_MIDI;
+    let validStartMax = direction === 'descendente' ? MAX_NOTE_MIDI : MAX_NOTE_MIDI - intervalSemitones;
 
     const startNoteMIDI = Math.floor(Math.random() * (validStartMax - validStartMin + 1)) + validStartMin;
     AppState.startNoteMIDI = startNoteMIDI;
@@ -330,12 +281,8 @@ function resetUI() {
     document.querySelectorAll('.interval-button-choice, #btn-ascendente, #btn-descendente').forEach(btn => {
         btn.disabled = false;
         btn.setAttribute('aria-pressed', 'false');
-        btn.classList.remove('bg-blue-600', 'bg-green-600', 'bg-red-600', 'ring-2', 'ring-offset-2', 'ring-blue-400', 'ring-green-600', 'ring-red-600');
-        if (btn.id.startsWith('interval-')) {
-            btn.classList.add('bg-gray-700', 'hover:bg-gray-600');
-        } else {
-            btn.classList.add('bg-gray-700', 'hover:bg-gray-600');
-        }
+        btn.classList.remove('bg-blue-600', 'bg-green-600', 'bg-red-600', 'ring-2', 'ring-offset-2', 'ring-blue-400');
+        btn.classList.add('bg-gray-700', 'hover:bg-gray-600');
     });
     setupDirectionButtons();
 }
@@ -375,7 +322,6 @@ function selectDirection(direction) {
 
     DOM.btnAscendente.classList.toggle('bg-blue-600', direction === 'ascendente');
     DOM.btnAscendente.classList.toggle('bg-gray-700', direction !== 'ascendente');
-    
     DOM.btnDescendente.classList.toggle('bg-blue-600', direction === 'descendente');
     DOM.btnDescendente.classList.toggle('bg-gray-700', direction !== 'descendente');
     
@@ -451,10 +397,6 @@ function highlightAnswers(isCorrect, selectedInterval, correctInterval, selected
         }
     }
 }
-
-// =========================================================================
-// 4. TEMPORITZADOR I UI
-// =========================================================================
 
 function startTimer() {
     stopTimer();
