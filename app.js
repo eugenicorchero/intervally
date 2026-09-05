@@ -22,10 +22,6 @@ const INTERVAL_MAP = [
 
 const getIntervalInfo = (semitones) => INTERVAL_MAP.find(i => i.semitones === semitones);
 
-// DIFICULTATS SEGONS REQUISITS:
-// Nivell 1 (Inicial): Ascendent, intervals majors/justos, amb sostinguts/bemolls.
-// Nivell 2 (Intermedi): Ascendent/Descendent, mateixos intervals majors/justos.
-// Nivell 3 (Difícil): Ascendent/Descendent, TOTS els intervals (cromàtics).
 const DIFFICULTY_CONFIG = {
     'inicial': { 
         semitones: [0, 2, 4, 5, 7, 9, 11, 12], 
@@ -209,6 +205,18 @@ function setupVexFlowRenderer(VF) {
     }
 }
 
+// Funció auxiliar per afegir alteracions de forma compatible amb totes les versions de VexFlow
+function addAccidentalToNote(VF, note, index, accidentalSymbol) {
+    if (!accidentalSymbol) return;
+    
+    const accidental = new VF.Accidental(accidentalSymbol);
+    if (typeof note.addAccidental === 'function') {
+        note.addAccidental(index, accidental);
+    } else if (typeof note.addModifier === 'function') {
+        note.addModifier(accidental, index);
+    }
+}
+
 function drawInterval(note1VF, note2VF) {
     const container = DOM.staveDisplayContainer;
     if (!AppState.isVexFlowLoaded || !AppState.vexFlow.VF) return;
@@ -227,13 +235,13 @@ function drawInterval(note1VF, note2VF) {
         stave.addClef('treble');
         stave.setContext(context).draw();
 
-        const notes = [
-            new VF.StaveNote({ clef: 'treble', keys: [note1VF.key], duration: 'q' }),
-            new VF.StaveNote({ clef: 'treble', keys: [note2VF.key], duration: 'q' })
-        ];
+        const note1 = new VF.StaveNote({ clef: 'treble', keys: [note1VF.key], duration: 'q' });
+        const note2 = new VF.StaveNote({ clef: 'treble', keys: [note2VF.key], duration: 'q' });
 
-        if (note1VF.accidental) notes[0].addAccidental(0, new VF.Accidental(note1VF.accidental));
-        if (note2VF.accidental) notes[1].addAccidental(0, new VF.Accidental(note2VF.accidental));
+        addAccidentalToNote(VF, note1, 0, note1VF.accidental);
+        addAccidentalToNote(VF, note2, 0, note2VF.accidental);
+
+        const notes = [note1, note2];
 
         const voice = new VF.Voice({ num_beats: 2, beat_value: 4 }).setStrict(false);
         voice.addTickables(notes);
